@@ -6,6 +6,7 @@ using Photon.Pun;
 public class Master : MonoBehaviour
 {
 
+    public static SubsystemMasterMono subsystemMaster = null;
     public static Dictionary<string, Subsystem> subsystems = new Dictionary<string, Subsystem>();
 
     [RuntimeInitializeOnLoadMethod]
@@ -22,7 +23,7 @@ public class Master : MonoBehaviour
     public static void ExecuteSubsystems()
     {
         GameObject master = new GameObject("master");
-        master.AddComponent<SubsystemMasterMono>();
+        subsystemMaster = master.AddComponent<SubsystemMasterMono>();
     }
 
 

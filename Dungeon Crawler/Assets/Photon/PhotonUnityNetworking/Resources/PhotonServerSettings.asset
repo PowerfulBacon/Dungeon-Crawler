@@ -34,5 +34,6 @@ MonoBehaviour:
   - DestroySpaceship
   - Fire
   - RespawnSpaceship
+  - RPCGenerateLevel
   DisableAutoOpenWizard: 1
   ShowSettings: 1

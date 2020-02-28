@@ -7,9 +7,14 @@ using Photon.Realtime;
 public class SubsystemMasterMono : MonoBehaviourPunCallbacks
 {
 
+    public PhotonView photonView = null;
+
     // Start is called before the first frame update
     void Start()
     {
+
+        photonView = gameObject.AddComponent<PhotonView>();
+
         foreach (Subsystem subsystem in Master.subsystems.Values)
         {
             StartCoroutine("StartSubroutine", subsystem);
@@ -19,6 +24,13 @@ public class SubsystemMasterMono : MonoBehaviourPunCallbacks
     public IEnumerator StartSubroutine(Subsystem system)
     {
         yield return system.UpdateThreadMaster();
+    }
+
+    [PunRPC]
+    public void RPCGenerateLevel(int seed, int levelSize = 255)
+    {
+        Debug.Log("Recieved");
+        Master.subsystems["levelGeneration"].Request("generateLevel", new object[] { seed, levelSize });
     }
 
     public override void OnCreateRoomFailed(short returnCode, string message)

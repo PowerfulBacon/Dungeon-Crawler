@@ -3,7 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
 using Photon.Pun;
-
+using Photon.Realtime;
+using ExitGames.Client.Photon;
 
 public class NetworkMaster : Subsystem
 {
@@ -47,20 +48,22 @@ public class NetworkMaster : Subsystem
 
             case "OnCreatedRoom":
                 //Execute the onPlayerEnteredCode and anything else
+                if (!PhotonNetwork.IsMasterClient)
+                    return;
+                LevelGenerator.currentSeed = Random.Range(0, 1000000000);
+                goto playerEnteredRoom;
 
             case "OnPlayerEnteredRoom":
+                playerEnteredRoom:
                 //Create a new player holder for the person
                 if (!PhotonNetwork.IsMasterClient)
                     break;
-                string key = Random.RandomRange(0, 1000).ToString();
-                if (playerKeys.ContainsKey(key))
-                    if (playerKeys[key].isConnected)
-                        //reject connection
-                        break;
+                //Ask them to generate the level
+                Master.subsystemMaster.photonView.RPC("RPCGenerateLevel", RpcTarget.All, LevelGenerator.currentSeed, 64);
                 break;
 
             default:
-                Debug.LogError("Unrecognised query [" + queryName + "] in levelgenerator, deleting");
+                Debug.LogError("Unrecognised query [" + queryName + "] in networkGenerator, deleting");
                 break;
         }
 

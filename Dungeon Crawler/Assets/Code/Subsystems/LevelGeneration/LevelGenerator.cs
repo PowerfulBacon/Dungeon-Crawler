@@ -15,16 +15,15 @@ public class LevelGenerator : Subsystem
         GenerateLevel(seed, levelSize);
     }
 
-    public Level GenerateLevel(int seed, int levelSize = 255, [CallerMemberName] string callerMemberName = "?", [CallerLineNumber] int callerLineNumber = -1)
+    protected override void Update()
+    {
+        base.Update();
+    }
+
+    public Level GenerateLevel(int seed, int levelSize = 255)
     {
 
         Random.InitState(seed);
-
-        if (!PhotonNetwork.IsMasterClient)
-        {
-            Debug.LogError("Attempted to generate level as non-server." + callerMemberName + ", line : " + callerLineNumber);
-            return null;
-        }
 
         //Generate blank level
         for (int x = 0; x < levelSize; x++)

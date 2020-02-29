@@ -61,7 +61,7 @@ public class LevelGenerator : Subsystem
         MeshFilter objectMesh = ((GameObject)levelResources.loadedResources["turf"]).GetComponentInChildren<MeshFilter>();
         Debug.Log(objectMesh);
 
-        const int MAX_VERTEX_COUNT = 25565;
+        const int MAX_VERTEX_COUNT = 65536;
         int currentVertexCount = 0;
 
         tempObject = Object.Instantiate((GameObject)levelResources.loadedResources["turf"], new Vector3(0, 0, 0), Quaternion.identity);
@@ -123,7 +123,6 @@ public class LevelGenerator : Subsystem
         holdStuff.AddComponent<MeshFilter>();
         holdStuff.AddComponent<MeshRenderer>();
         holdStuff.GetComponent<MeshFilter>().sharedMesh = new Mesh();
-        holdStuff.GetComponent<MeshFilter>().sharedMesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
         holdStuff.GetComponent<MeshFilter>().sharedMesh.CombineMeshes(meshes.ToArray(), true);
         holdStuff.GetComponent<MeshRenderer>().materials = ((GameObject)levelResources.loadedResources["turf"]).GetComponent<MeshRenderer>().sharedMaterials;
         holdStuff.SetActive(true);

@@ -59,7 +59,7 @@ public class NetworkMaster : Subsystem
                 if (!PhotonNetwork.IsMasterClient)
                     break;
                 //Ask them to generate the level
-                Master.subsystemMaster.photonView.RPC("RPCGenerateLevel", RpcTarget.All, LevelGenerator.currentSeed, 64);
+                Master.subsystemMaster.photonView.RPC("RPCGenerateLevel", RpcTarget.All, LevelGenerator.currentSeed, 256);
                 break;
 
             default:

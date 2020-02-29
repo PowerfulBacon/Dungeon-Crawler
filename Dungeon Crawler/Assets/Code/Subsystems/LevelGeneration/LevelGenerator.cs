@@ -14,7 +14,7 @@ public class LevelGenerator : Subsystem
 
     MonoLevelMaster levelMaster;
 
-    GameObject prefabObject = null;
+    GameObject tempObject;
 
     public override void Initialise()
     {
@@ -41,6 +41,8 @@ public class LevelGenerator : Subsystem
                 break;
         }
 
+        subsystemQuery.Remove(queryName);
+
     }
 
 
@@ -49,22 +51,27 @@ public class LevelGenerator : Subsystem
 
         Debug.Log("Generating this might take a while for large levels...");
 
-        if (prefabObject == null)
-        {
-            SetupPrefabObject();
-        }
-
         //Create level holder thingy
         Level level = new Level(levelSize, levelSize);
 
         //Set the seed
         Random.InitState(seed);
 
-        //Generate blank level
+        //Get the mesh
+        MeshFilter objectMesh = ((GameObject)levelResources.loadedResources["turf"]).GetComponentInChildren<MeshFilter>();
+        Debug.Log(objectMesh);
+
+        const int MAX_VERTEX_COUNT = 25565;
+        int currentVertexCount = 0;
+
+        tempObject = Object.Instantiate((GameObject)levelResources.loadedResources["turf"], new Vector3(0, 0, 0), Quaternion.identity);
+        tempObject.SetActive(false);
+
         for (int x = 0; x < levelSize; x++)
         {
             for (int y = 0; y < levelSize; y++)
             {
+                //<overview>
                 //Generate Forced Layers (Floor + Ceiling)
                 //THIS
                 //IS WAY
@@ -72,19 +79,58 @@ public class LevelGenerator : Subsystem
                 //SLOW
                 //STORE NORMALLY IN ARRAY
                 //IN GAME OBJECTES, MUST COMBINE MESHES FOR EFFICIENCY
-                GameObject floorLayer = Object.Instantiate(prefabObject, new Vector3(x, 0, y), Quaternion.identity);
-                level.turfs[x, y, 0] = floorLayer.GetComponent<Turf>();
+                //</overview>
+
+                if (currentVertexCount + objectMesh.sharedMesh.vertexCount >= MAX_VERTEX_COUNT)
+                {
+                    GenerateCombinedMeshes(currentVertexCount);
+                    currentVertexCount = 0;
+                }
+
+                //Load the cube
+                GameObject tempChild = new GameObject();
+                tempChild.transform.SetParent(tempObject.transform);
+                var f = tempChild.AddComponent<MeshFilter>();
+                f.sharedMesh = objectMesh.sharedMesh;
+                f.transform.position = new Vector3(x, 0, y);
+                f.transform.localScale = new Vector3(1, 1, 1);
+
+                currentVertexCount += objectMesh.sharedMesh.vertexCount;
             }
         }
+
+        GenerateCombinedMeshes(currentVertexCount);
 
         return null;
 
     }
 
 
-    public void SetupPrefabObject()
+    public void GenerateCombinedMeshes(int currentVertexCount)
     {
-        prefabObject = (GameObject)levelResources.loadedResources["turf"];
+        MeshFilter[] meshFilters = tempObject.GetComponentsInChildren<MeshFilter>();
+        List<CombineInstance> meshes = new List<CombineInstance>();
+
+        for (int i = 1; i < meshFilters.Length; i++)
+        {
+            CombineInstance instance = new CombineInstance();
+            instance.mesh = meshFilters[i].sharedMesh;
+            instance.transform = meshFilters[i].transform.localToWorldMatrix;
+            meshes.Add(instance);
+        }
+
+        GameObject holdStuff = new GameObject("MeshObject");
+        holdStuff.AddComponent<MeshFilter>();
+        holdStuff.AddComponent<MeshRenderer>();
+        holdStuff.GetComponent<MeshFilter>().sharedMesh = new Mesh();
+        holdStuff.GetComponent<MeshFilter>().sharedMesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
+        holdStuff.GetComponent<MeshFilter>().sharedMesh.CombineMeshes(meshes.ToArray(), true);
+        holdStuff.GetComponent<MeshRenderer>().materials = ((GameObject)levelResources.loadedResources["turf"]).GetComponent<MeshRenderer>().sharedMaterials;
+        holdStuff.SetActive(true);
+
+        Object.Destroy(tempObject);
+        tempObject = Object.Instantiate((GameObject)levelResources.loadedResources["turf"], new Vector3(0, 0, 0), Quaternion.identity);
+        tempObject.SetActive(false);
     }
 
 }

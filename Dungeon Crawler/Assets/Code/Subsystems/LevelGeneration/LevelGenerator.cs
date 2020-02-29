@@ -125,6 +125,7 @@ public class LevelGenerator : Subsystem
         holdStuff.GetComponent<MeshFilter>().sharedMesh = new Mesh();
         holdStuff.GetComponent<MeshFilter>().sharedMesh.CombineMeshes(meshes.ToArray(), true);
         holdStuff.GetComponent<MeshRenderer>().materials = ((GameObject)levelResources.loadedResources["turf"]).GetComponent<MeshRenderer>().sharedMaterials;
+        holdStuff.AddComponent<MeshCollider>();
         holdStuff.SetActive(true);
 
         Object.Destroy(tempObject);

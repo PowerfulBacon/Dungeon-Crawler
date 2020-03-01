@@ -67,20 +67,13 @@ public class LevelGenerator : Subsystem
         tempObject = Object.Instantiate((GameObject)levelResources.loadedResources["turf"], new Vector3(0, 0, 0), Quaternion.identity);
         tempObject.SetActive(false);
 
+        //Generate the walls and rooms and shit
+        GenerateActiveLayer();
+
         for (int x = 0; x < levelSize; x++)
         {
             for (int y = 0; y < levelSize; y++)
             {
-                //<overview>
-                //Generate Forced Layers (Floor + Ceiling)
-                //THIS
-                //IS WAY
-                //TOO
-                //SLOW
-                //STORE NORMALLY IN ARRAY
-                //IN GAME OBJECTES, MUST COMBINE MESHES FOR EFFICIENCY
-                //</overview>
-
                 if (currentVertexCount + objectMesh.sharedMesh.vertexCount >= MAX_VERTEX_COUNT)
                 {
                     GenerateCombinedMeshes(currentVertexCount);
@@ -102,6 +95,20 @@ public class LevelGenerator : Subsystem
         GenerateCombinedMeshes(currentVertexCount);
 
         return null;
+
+    }
+
+
+    public List<GenerationAreaSettings> ReadGenerationSettings()
+    {
+        Resource resource = new Resource("Data");
+        List<GenerationAreaSettings> areas = LevelGenDataParser.ParseGenerationDataJson(resource);
+        return areas;
+    }
+
+
+    public void GenerateActiveLayer()
+    {
 
     }
 

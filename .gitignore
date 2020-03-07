@@ -37,3 +37,6 @@ Thumbs.db
 Dungeon Crawler/.vs/Dungeon Crawler/v15/Server/sqlite3/storage.ide-wal
 Dungeon Crawler/.vs/Dungeon Crawler/v15/Server/sqlite3/storage.ide-wal
 Dungeon Crawler/.vs/Dungeon Crawler/v15/Server/sqlite3/storage.ide
+*.ide
+*.ide-shm
+*.ide-wal

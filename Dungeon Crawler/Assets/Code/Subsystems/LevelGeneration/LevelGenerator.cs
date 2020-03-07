@@ -181,6 +181,8 @@ public class LevelGenerator : Subsystem
                 turfs[tile.x, tile.y].calculated = true;
                 turfs[tile.x, tile.y].occupied = tile.type == "wall";
                 turfs[tile.x, tile.y].turfMesh = objectMesh.sharedMesh;
+                if (tile.door_dir_x != 0 || tile.door_dir_y != 0)
+                    turfs[tile.x, tile.y].door = true;
 
                 if (tile.door_dir_x != 0 || tile.door_dir_y != 0)
                 {

@@ -12,11 +12,11 @@ public class GenerationAreaSettings
     public List<GenerationTurfSettings> generationTurfSettings = new List<GenerationTurfSettings>();
 
     //List of directions for calculating if we are touching something
-    private Vector2[] directions = {
-        new Vector2(1, 0),
-        new Vector2(-1, 0),
-        new Vector2(0, 1),
-        new Vector2(0, -1)
+    private Vector2Int[] directions = {
+        new Vector2Int(1, 0),
+        new Vector2Int(-1, 0),
+        new Vector2Int(0, 1),
+        new Vector2Int(0, -1)
     };
 
     public GenerationAreaSettings(GenerationAreaSettings settings = null)
@@ -138,9 +138,23 @@ public class GenerationAreaSettings
                 }
 
                 //Final check, see if any rooms that border us have doors that need filling
-                foreach(Vector2 direction in directions)
+                foreach(Vector2Int direction in directions)
                 {
+                    Vector2Int checkPos = new Vector2Int(tiles.x + direction.x, tiles.y + direction.y);
 
+                    //Check if it goes out of bounds
+                    if (checkPos.x >= turfs.GetLength(0) || checkPos.y >= turfs.GetLength(0) || checkPos.x < 0 || checkPos.y < 0)
+                    {
+                        roomValid = false;
+                        break;
+                    }
+
+                    //Check if occupied and has door
+                    if (turfs[checkPos.x, checkPos.y].door && (tiles.door_dir_x == 0 && tiles.door_dir_y == 0))
+                    {
+                        roomValid = false;
+                        break;
+                    }
                 }
 
             }

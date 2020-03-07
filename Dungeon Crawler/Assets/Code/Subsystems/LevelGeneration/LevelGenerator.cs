@@ -59,7 +59,6 @@ public class LevelGenerator : Subsystem
 
         //Get the mesh
         MeshFilter objectMesh = ((GameObject)levelResources.loadedResources["turf"]).GetComponentInChildren<MeshFilter>();
-        Debug.Log(objectMesh);
 
         const int MAX_VERTEX_COUNT = 65536;
         int currentVertexCount = 0;
@@ -67,21 +66,14 @@ public class LevelGenerator : Subsystem
         tempObject = Object.Instantiate((GameObject)levelResources.loadedResources["turf"], new Vector3(0, 0, 0), Quaternion.identity);
         tempObject.SetActive(false);
 
+        //Generate the walls and rooms and shit
+        var activeLayer = GenerateActiveLayer(levelSize);
+
         for (int x = 0; x < levelSize; x++)
         {
             for (int y = 0; y < levelSize; y++)
             {
-                //<overview>
-                //Generate Forced Layers (Floor + Ceiling)
-                //THIS
-                //IS WAY
-                //TOO
-                //SLOW
-                //STORE NORMALLY IN ARRAY
-                //IN GAME OBJECTES, MUST COMBINE MESHES FOR EFFICIENCY
-                //</overview>
-
-                if (currentVertexCount + objectMesh.sharedMesh.vertexCount >= MAX_VERTEX_COUNT)
+                if (currentVertexCount + objectMesh.sharedMesh.vertexCount * 2 >= MAX_VERTEX_COUNT)
                 {
                     GenerateCombinedMeshes(currentVertexCount);
                     currentVertexCount = 0;
@@ -94,8 +86,19 @@ public class LevelGenerator : Subsystem
                 f.sharedMesh = objectMesh.sharedMesh;
                 f.transform.position = new Vector3(x, 0, y);
                 f.transform.localScale = new Vector3(1, 1, 1);
-
                 currentVertexCount += objectMesh.sharedMesh.vertexCount;
+
+                //Load the cube
+                if (activeLayer[x, y].occupied)
+                {
+                    GameObject middleLayer = new GameObject();
+                    middleLayer.transform.SetParent(tempObject.transform);
+                    var middleFilter = middleLayer.AddComponent<MeshFilter>();
+                    middleFilter.sharedMesh = objectMesh.sharedMesh;
+                    middleFilter.transform.position = new Vector3(x, 1, y);
+                    middleFilter.transform.localScale = new Vector3(1, 1, 1);
+                    currentVertexCount += objectMesh.sharedMesh.vertexCount;
+                }
             }
         }
 
@@ -103,6 +106,106 @@ public class LevelGenerator : Subsystem
 
         return null;
 
+    }
+
+
+    public List<GenerationAreaSettings> ReadGenerationSettings()
+    {
+        Resource resource = new Resource("Data");
+        List<GenerationAreaSettings> areas = LevelGenDataParser.ParseGenerationDataJson(resource);
+        return areas;
+    }
+
+
+    public Turf[,] GenerateActiveLayer(int size = 255)
+    {
+
+        MeshFilter objectMesh = ((GameObject)levelResources.loadedResources["turf"]).GetComponentInChildren<MeshFilter>();
+
+        List<GenerationAreaSettings> areaData = ReadGenerationSettings();
+        Turf[,] turfs = new Turf[size, size];
+
+        //Count how many rooms were made
+        int roomCount = 0;
+        int successfulCount = 0;
+
+        //Populate array with default values
+        for (int x = 0; x < size; x++)
+            for (int y = 0; y < size; y ++)
+                turfs[x, y] = new Turf();
+
+        List<TempTileData> tilesToProcess = new List<TempTileData>();
+        TempTileData initialRoom = new TempTileData();
+        initialRoom.connection_x = 1;
+        initialRoom.connection_y = 0;
+        initialRoom.x = size / 2;
+        initialRoom.y = size / 2;
+        tilesToProcess.Add(initialRoom);
+
+        //Generate the rooms
+        while (tilesToProcess.Count > 0)
+        {
+            //Log the amount of rooms
+            roomCount++;
+            Debug.Log("Processing tile at " + tilesToProcess[0].x + "," + tilesToProcess[0].y + " with direction " + tilesToProcess[0].connection_x + "," + tilesToProcess[0].connection_y);
+
+            //Generate a list of rooms that can be used
+            List<GenerationAreaSettings> validRooms = new List<GenerationAreaSettings>();
+
+            //Check which areas can be placed
+            foreach (GenerationAreaSettings setting in areaData)
+            {
+                Direction direction = Direction.NORTH;
+                if (tilesToProcess[0].connection_x == 1) direction = Direction.WEST;
+                else if (tilesToProcess[0].connection_x == -1) direction = Direction.EAST;
+                else if (tilesToProcess[0].connection_y == 1) direction = Direction.NORTH;
+                else if (tilesToProcess[0].connection_y == -1) direction = Direction.SOUTH;
+                else Debug.LogError("Major error, door direction invalid");
+                validRooms.AddRange(setting.CheckSpace(turfs, tilesToProcess[0].x, tilesToProcess[0].y, direction));
+            }
+
+            //Check weights
+            //Place it
+            if (validRooms.Count == 0)
+            {
+                Debug.LogError("WARNGING, NO VALID ROOMS TO PLACE :FLUSHED:");
+                tilesToProcess.RemoveAt(0);
+                continue;
+            }
+
+            GenerationAreaSettings chosenArea = Helpers.Pick(validRooms);
+
+            foreach (GenerationTurfSettings tile in chosenArea.generationTurfSettings)
+            {
+                //Debug.Log("[" + tile.x + "]" + "[" + tile.y + "] : Added turf, type : [" + tile.type + "]" + (tile.type == "wall").ToString()); //DEBUG, REMOVE WHEN DONE
+                turfs[tile.x, tile.y].calculated = true;
+                turfs[tile.x, tile.y].occupied = tile.type == "wall";
+                turfs[tile.x, tile.y].turfMesh = objectMesh.sharedMesh;
+                if (tile.door_dir_x != 0 || tile.door_dir_y != 0)
+                    turfs[tile.x, tile.y].door = true;
+
+                if (tile.door_dir_x != 0 || tile.door_dir_y != 0)
+                {
+                    TempTileData data = new TempTileData();
+                    data.x = tile.x;
+                    data.y = tile.y;
+                    data.connection_x = tile.door_dir_x;
+                    data.connection_y = tile.door_dir_y;
+                    tilesToProcess.Add(data);
+
+                    Debug.Log("Added new tile to be processed at " + data.x + "," + data.y + "," + data.connection_x + "," + data.connection_y);
+                }
+
+            }
+
+            successfulCount++;
+            tilesToProcess.RemoveAt(0);
+
+        }
+
+        Debug.Log("<color=green>Successfully generated " + roomCount + " rooms, of which " + successfulCount + " were successful</color>");
+
+        return turfs;
     }
 
 

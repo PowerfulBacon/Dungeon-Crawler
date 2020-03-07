@@ -5,6 +5,11 @@ using UnityEngine;
 public class LevelGenDataParser
 {
 
+    public static string Sanatise(string input)
+    {
+        return input.Replace("\"", "").Replace(",", "").Replace("\t", "").Replace("\r", "");
+    }
+
     public static List<GenerationAreaSettings> ParseGenerationDataJson(Resource textResource)
     {
         TextAsset textAsset = (TextAsset)textResource.loadedResources["level_gen_areas"];
@@ -21,7 +26,7 @@ public class LevelGenDataParser
             {
                 if (line.Contains(":"))
                 {
-                    string[] parts = line.Replace("\"", "").Split(':');
+                    string[] parts = Sanatise(line).Split(':');
                     switch (parts[0])
                     {
                         case "name":
@@ -33,7 +38,7 @@ public class LevelGenDataParser
                             currentArea.weight = probability;
                             continue;
                         case "type":
-                            currentArea.type = parts[2];
+                            currentArea.type = parts[1];
                             continue;
                         case "width":
                             int width = 0;
@@ -60,7 +65,7 @@ public class LevelGenDataParser
             }
             else
             {
-                string[] parts = line.Replace("\"", "").Split(':');
+                string[] parts = Sanatise(line).Split(':');
                 switch (parts[0])
                 {
                     case "x":

@@ -104,15 +104,24 @@ public class GenerationAreaSettings
             foreach (GenerationTurfSettings tiles in potentialRoom.generationTurfSettings)
             {
                 //Check if room is out of bounds
-                if (turfs.GetLength(0) < tiles.x || turfs.GetLength(0) < tiles.y || tiles.x < 0 || tiles.y < 0)
+                if (turfs.GetLength(0) <= tiles.x || turfs.GetLength(0) <= tiles.y || tiles.x < 0 || tiles.y < 0)
                 {
                     roomValid = false;
                     break;
                 }
 
                 //Check if room overlaps another
-                if (turfs[tiles.x, tiles.y] == null || turfs[tiles.x, tiles.y].calculated)
+                try
                 {
+                    if (turfs[tiles.x, tiles.y] == null || turfs[tiles.x, tiles.y].calculated)
+                    {
+                        roomValid = false;
+                        break;
+                    }
+                }
+                catch
+                {
+                    Debug.Log(turfs.GetLength(0) + "," + tiles.x + "," + tiles.y);
                     roomValid = false;
                     break;
                 }

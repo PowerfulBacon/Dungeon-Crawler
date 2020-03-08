@@ -54,12 +54,16 @@ public class NetworkMaster : Subsystem
                 goto playerEnteredRoom;
 
             case "OnPlayerEnteredRoom":
+                //Create a player just for them <3 
+                var instantiatedObject = PhotonNetwork.Instantiate("NetworkPrefab/Player", new Vector3(0, 2.75f, 0), Quaternion.identity, 0);
+                instantiatedObject.GetPhotonView().TransferOwnership((Photon.Realtime.Player)queryData);
+
                 playerEnteredRoom:
                 //Create a new player holder for the person
                 if (!PhotonNetwork.IsMasterClient)
                     break;
                 //Ask them to generate the level
-                Master.subsystemMaster.photonView.RPC("RPCGenerateLevel", RpcTarget.All, LevelGenerator.currentSeed, 256);
+                Master.subsystemMaster.photonView.RPC("RPCGenerateLevel", RpcTarget.All, LevelGenerator.currentSeed, 64);
                 break;
 
             default:

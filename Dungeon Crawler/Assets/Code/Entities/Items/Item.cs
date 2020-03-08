@@ -8,6 +8,7 @@ public class Item
     public static Material globalMaterial;
 
     public Mesh itemMesh;
+    public Sprite itemIcon;
 
     public virtual void OnInitialise() { }
 

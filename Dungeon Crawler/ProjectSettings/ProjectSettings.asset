@@ -642,7 +642,7 @@ PlayerSettings:
   facebookStatus: 1
   facebookXfbml: 0
   facebookFrictionlessRequests: 1
-  apiCompatibilityLevel: 2
+  apiCompatibilityLevel: 6
   cloudProjectId: d7bbb772-6bf7-4082-a763-90acb2e43035
   framebufferDepthMemorylessMode: 0
   projectName: Dungeon Crawler

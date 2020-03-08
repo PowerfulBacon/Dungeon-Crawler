@@ -7,10 +7,12 @@ public class Player : Mob
 {
 
     public Dictionary<string, object> flags = new Dictionary<string, object>();
-    public List<PlayerModule> modules = new List<PlayerModule> { new PlayerMovement() };
+    public List<PlayerModule> modules = new List<PlayerModule> { new PlayerMovement(), new PlayerCamera() };
 
     public Stats stats = new Stats();
     public Skills skills = new Skills();
+
+    public int health = 100;
 
     // Start is called before the first frame update
     void Start()

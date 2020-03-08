@@ -74,7 +74,13 @@ public class Stats
         }
 
         return stats;
+    }
 
+    //Take weight into account
+    //Make final go through a scale that prevents it from being ridiculous
+    public float GetSpeed(Mob m)
+    {
+        return dexterity * 0.4f + 3.5f;
     }
 
 }

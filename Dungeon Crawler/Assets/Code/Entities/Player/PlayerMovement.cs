@@ -15,7 +15,11 @@ public class PlayerMovement : PlayerModule
 
         Vector3 inputControlers = new Vector3(Input.GetAxis("Horizontal"), 0, Input.GetAxis("Vertical"));
 
-        characterController.Move(inputControlers * Time.deltaTime);
+        Vector3 outputMovement = new Vector3();
+        outputMovement += parent.transform.forward * inputControlers.z * parent.stats.GetSpeed(parent);
+        outputMovement += parent.transform.right * inputControlers.x * parent.stats.GetSpeed(parent);
+
+        characterController.Move(outputMovement * Time.deltaTime);
 
     }
 

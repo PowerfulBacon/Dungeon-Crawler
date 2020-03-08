@@ -84,8 +84,8 @@ public class LevelGenerator : Subsystem
                 tempChild.transform.SetParent(tempObject.transform);
                 var f = tempChild.AddComponent<MeshFilter>();
                 f.sharedMesh = objectMesh.sharedMesh;
-                f.transform.position = new Vector3(x, 0, y);
-                f.transform.localScale = new Vector3(1, 1, 1);
+                f.transform.position = new Vector3(x * 2, 0, y * 2);
+                f.transform.localScale = new Vector3(2, 2, 2);
                 currentVertexCount += objectMesh.sharedMesh.vertexCount;
 
                 //Load the cube
@@ -95,8 +95,8 @@ public class LevelGenerator : Subsystem
                     middleLayer.transform.SetParent(tempObject.transform);
                     var middleFilter = middleLayer.AddComponent<MeshFilter>();
                     middleFilter.sharedMesh = objectMesh.sharedMesh;
-                    middleFilter.transform.position = new Vector3(x, 1, y);
-                    middleFilter.transform.localScale = new Vector3(1, 1, 1);
+                    middleFilter.transform.position = new Vector3(x * 2, 1 * 2, y * 2);
+                    middleFilter.transform.localScale = new Vector3(2, 2, 2);
                     currentVertexCount += objectMesh.sharedMesh.vertexCount;
                 }
             }

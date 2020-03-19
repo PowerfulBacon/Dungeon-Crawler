@@ -13,6 +13,10 @@ public class NetworkMaster : Subsystem
 
     public ServerConnector serverConnector = new ServerConnector();
 
+    public NetworkMaster(string name = "") : base(name)
+    {
+    }
+
     public override void Initialise()
     {
         Request("MasterConnect", new ServerConnectSettings("Test1", true));

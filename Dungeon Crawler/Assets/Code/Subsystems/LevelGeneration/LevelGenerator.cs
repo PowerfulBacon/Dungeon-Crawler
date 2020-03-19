@@ -16,6 +16,10 @@ public class LevelGenerator : Subsystem
 
     GameObject tempObject;
 
+    public LevelGenerator(string name = "") : base(name)
+    {
+    }
+
     public override void Initialise()
     {
         //Load the level resources
@@ -147,7 +151,7 @@ public class LevelGenerator : Subsystem
         {
             //Log the amount of rooms
             roomCount++;
-            Debug.Log("Processing tile at " + tilesToProcess[0].x + "," + tilesToProcess[0].y + " with direction " + tilesToProcess[0].connection_x + "," + tilesToProcess[0].connection_y);
+            Log.Print("Processing tile at " + tilesToProcess[0].x + "," + tilesToProcess[0].y + " with direction " + tilesToProcess[0].connection_x + "," + tilesToProcess[0].connection_y);
 
             //Generate a list of rooms that can be used
             List<GenerationAreaSettings> validRooms = new List<GenerationAreaSettings>();
@@ -193,7 +197,7 @@ public class LevelGenerator : Subsystem
                     data.connection_y = tile.door_dir_y;
                     tilesToProcess.Add(data);
 
-                    Debug.Log("Added new tile to be processed at " + data.x + "," + data.y + "," + data.connection_x + "," + data.connection_y);
+                    Log.Print("Added new tile to be processed at " + data.x + "," + data.y + "," + data.connection_x + "," + data.connection_y);
                 }
 
             }
@@ -203,7 +207,7 @@ public class LevelGenerator : Subsystem
 
         }
 
-        Debug.Log("<color=green>Successfully generated " + roomCount + " rooms, of which " + successfulCount + " were successful</color>");
+        Log.Print("<color=green>Successfully generated " + roomCount + " rooms, of which " + successfulCount + " were successful</color>");
 
         return turfs;
     }

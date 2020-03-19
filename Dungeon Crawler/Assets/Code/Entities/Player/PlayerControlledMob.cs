@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PlayerControlledMob : Mob
+public class Player : Mob
 {
 
     public Dictionary<string, object> flags = new Dictionary<string, object>();
@@ -30,6 +30,18 @@ public class PlayerControlledMob : Mob
         foreach (PlayerModule module in modules)
             module.OnUpdate(this);
 
+    }
+
+    public new void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
+    {
+        if (stream.IsWriting)
+        {
+
+        }
+        else
+        {
+
+        }
     }
 
 }

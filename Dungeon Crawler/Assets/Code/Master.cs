@@ -1,4 +1,8 @@
-﻿using System.Collections;
+﻿//Enables or disables debug mode
+#define DEBUG
+//#undef DEBUG
+
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Photon.Pun;
@@ -8,6 +12,13 @@ public class Master : MonoBehaviour
 
     public static SubsystemMasterMono subsystemMaster = null;
     public static Dictionary<string, Subsystem> subsystems = new Dictionary<string, Subsystem>();
+
+    //If we are running in debug mode
+    #if DEBUG
+    public const bool DEBUG_MODE = true;
+    #else
+        public const bool DEBUG_MODE = false;
+    #endif
 
     [RuntimeInitializeOnLoadMethod]
     public static void OnGameStart()
@@ -29,8 +40,9 @@ public class Master : MonoBehaviour
 
     public static void LoadAllSubsystems()
     {
-        subsystems.Add("levelGeneration", new LevelGenerator());
-        subsystems.Add("networkManagement", new NetworkMaster());
+        subsystems.Add("levelGeneration", new LevelGenerator("levelGenerator"));
+        subsystems.Add("networkManagement", new NetworkMaster("networkMaster"));
+        subsystems.Add("entities", new EntitySubsystem("entities"));
     }
 
 }

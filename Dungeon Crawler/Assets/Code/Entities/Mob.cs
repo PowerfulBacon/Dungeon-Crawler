@@ -8,7 +8,14 @@ public class Mob : MonoBehaviourPunCallbacks, IPunObservable
 
     public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
     {
-        return;
+        if (stream.IsWriting)
+        {
+
+        }
+        else
+        {
+
+        }
     }
 
 }

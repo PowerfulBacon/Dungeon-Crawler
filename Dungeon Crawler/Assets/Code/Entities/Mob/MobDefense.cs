@@ -33,8 +33,26 @@ public partial class Mob : Entity
 
     /// <summary>
     /// Applies damage to the mob.
+    /// Pretty insecure to be honest.
     /// </summary>
     public void ApplyDamage(DamageType damageType, int force, int armourPenetration)
+    {
+        if(photonView.IsMine)
+        {
+            RPCDealDamage(damageType, force, armourPenetration);
+        }
+        else
+        {
+            photonView.RPC("RPCDealDamage", photonView.Controller, damageType, force, armourPenetration);
+        }
+    }
+
+    /// <summary>
+    /// Very unsafe, since hackers can just call it on anyone.
+    /// Not too much of a worry right now, intended that they just get kicked by host.
+    /// </summary>
+    [PunRPC]
+    public void RPCDealDamage(DamageType damageType, int force, int armourPenetration)
     {
         damageLoss -= armour.GetDamageAfterArmour(damageType, force, armourPenetration);
     }

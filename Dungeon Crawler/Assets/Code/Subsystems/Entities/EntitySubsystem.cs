@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using Photon.Pun;
 using UnityEngine;
 
 public class EntitySubsystem : Subsystem
@@ -10,6 +11,7 @@ public class EntitySubsystem : Subsystem
 
     public EntitySubsystem(string name = "") : base(name)
     {
+        
     }
 
     public override void Initialise()
@@ -26,7 +28,7 @@ public class EntitySubsystem : Subsystem
             }
             catch(Exception e)
             {
-                Log.Print("An error has occured, entity failed to update: " + e.Message, false);
+                Log.PrintError("An error has occured, entity failed to update:\n" + e.Message, false);
             }
         }
     }

@@ -53,7 +53,9 @@ public class LevelGenerator : Subsystem
     public Level GenerateLevel(int seed, int levelSize = 255)
     {
 
-        Debug.Log("Generating this might take a while for large levels...");
+        Log.ServerMessage($"<style=success>Level generation requested with seed {seed}</style>");
+
+        Log.ServerMessage("Generating this might take a while for large levels...");
 
         //Create level holder thingy
         Level level = new Level(levelSize, levelSize);
@@ -151,7 +153,7 @@ public class LevelGenerator : Subsystem
         {
             //Log the amount of rooms
             roomCount++;
-            Log.Print("Processing tile at " + tilesToProcess[0].x + "," + tilesToProcess[0].y + " with direction " + tilesToProcess[0].connection_x + "," + tilesToProcess[0].connection_y);
+            //Log.Print("Processing tile at " + tilesToProcess[0].x + "," + tilesToProcess[0].y + " with direction " + tilesToProcess[0].connection_x + "," + tilesToProcess[0].connection_y);
 
             //Generate a list of rooms that can be used
             List<GenerationAreaSettings> validRooms = new List<GenerationAreaSettings>();
@@ -164,7 +166,7 @@ public class LevelGenerator : Subsystem
                 else if (tilesToProcess[0].connection_x == -1) direction = Direction.EAST;
                 else if (tilesToProcess[0].connection_y == 1) direction = Direction.NORTH;
                 else if (tilesToProcess[0].connection_y == -1) direction = Direction.SOUTH;
-                else Debug.LogError("Major error, door direction invalid");
+                else Log.PrintError("Major error, door direction invalid");
                 validRooms.AddRange(setting.CheckSpace(turfs, tilesToProcess[0].x, tilesToProcess[0].y, direction));
             }
 
@@ -172,7 +174,6 @@ public class LevelGenerator : Subsystem
             //Place it
             if (validRooms.Count == 0)
             {
-                Debug.LogError("WARNGING, NO VALID ROOMS TO PLACE :FLUSHED:");
                 tilesToProcess.RemoveAt(0);
                 continue;
             }
@@ -197,7 +198,7 @@ public class LevelGenerator : Subsystem
                     data.connection_y = tile.door_dir_y;
                     tilesToProcess.Add(data);
 
-                    Log.Print("Added new tile to be processed at " + data.x + "," + data.y + "," + data.connection_x + "," + data.connection_y);
+                    //Log.Print("Added new tile to be processed at " + data.x + "," + data.y + "," + data.connection_x + "," + data.connection_y);
                 }
 
             }

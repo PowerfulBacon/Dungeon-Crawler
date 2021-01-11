@@ -29,7 +29,7 @@ public class SubsystemMasterMono : MonoBehaviourPunCallbacks
     [PunRPC]
     public void RPCGenerateLevel(int seed, int levelSize = 255)
     {
-        Debug.Log("Recieved");
+        Log.Print("Recieved");
         Master.subsystems["levelGeneration"].Request("generateLevel", new object[] { seed, levelSize });
     }
 

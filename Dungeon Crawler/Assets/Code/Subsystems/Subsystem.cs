@@ -53,7 +53,7 @@ public class Subsystem
             long endTime = DateTime.Now.Ticks / (TimeSpan.TicksPerMillisecond / 1000);
             processingTime = (endTime - startTime) / 1000000.0f;
             if (processingTime >= timeBetweenUpdates)
-                Log.Print("Warning! Subsystem [" + subsystemName + "] took " + processingTime + " seconds to update");
+                Log.ServerMessage("Warning! Subsystem [" + subsystemName + "] took " + processingTime + " seconds to update");
             float timeToWait = Mathf.Clamp(timeBetweenUpdates - processingTime, 0, timeBetweenUpdates);
             yield return new WaitForSeconds(timeToWait);
         }

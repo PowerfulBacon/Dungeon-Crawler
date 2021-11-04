@@ -30,7 +30,7 @@ public class Resource
             }
             catch(Exception e)
             {
-                Debug.LogError("Major error while loading, " + e.Message);
+                Log.PrintError("Major error while loading, " + e.Message);
             }
         }
     }

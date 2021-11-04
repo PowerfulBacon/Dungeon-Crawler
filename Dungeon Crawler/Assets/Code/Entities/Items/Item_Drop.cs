@@ -26,6 +26,13 @@ public partial class Item : Entity
 
         Log.PrintDebug("Dropping");
 
+        if((flags & FLAG_DROP_DEL) != 0)
+        {
+            RemoveFromInventory();
+            PhotonNetwork.Destroy(photonView);
+            return;
+        }
+
         //Tell everyone we have been dropped
         photonView.RPC("RPCDroppedAll", RpcTarget.All);
 

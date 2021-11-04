@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 public class PlayerUserInterfaceModule : PlayerModule
@@ -53,68 +54,109 @@ public class PlayerUserInterfaceModule : PlayerModule
         {
             parent.inventory.DecreaseHotbarIndex(hotbarParent);
         }
+
         //Hotbar buttons
         HandleHotbarButtons(parent);
+
         //Update cursor
-        if(inventoryOpen)
+        if(!inventoryOpen)
+            return;
+        
+        //Set the position of the cursor object
+        cursorObject.transform.position = Input.mousePosition;
+
+        //Perform actions!
+        //ACTION PRIORITY:
+        // - Dropdown menu handling
+        // - Handling Drag Actions
+
+        //===== Dropdown Handling =====
+        //Open the dropdown menu
+        if(Input.GetMouseButtonDown(1))
         {
-            //Set the position of the cursor object
-            cursorObject.transform.position = Input.mousePosition;
-            //Perform actions!
-            //===== Drag Handling =====
-            //Todo: Dragging from the hotbar too
-            if(Input.GetMouseButtonDown(0) && !isDragging)
+            //Get the pointer position
+            Vector3 pointerPosition = Input.mousePosition;
+            //Find the index of what we are over
+            int index = InventoryUi.CursorPositionToIndex(pointerPosition.x, pointerPosition.y);
+            //Check if something is even there
+            if(index != -1 && parent.inventory.inventory[index] != null)
             {
-                //Get the pointer position
-                Vector3 pointerPosition = Input.mousePosition;
-                //Find the index of what we are over
-                int index = InventoryUi.CursorPositionToIndex(pointerPosition.x, pointerPosition.y);
-                //Check if something is even there
-                if(index != -1 && parent.inventory.inventory[index] != null)
-                {
-                    //Find the image we are dragging
-                    draggingImage = inventoryUi.GetComponentsInChildren<Image>()[index * 2 + 1];
-                    startingDragImagePosition = draggingImage.transform.localPosition;
-                    dragStartIndex = index;
-                    //Begin dragging
-                    isDragging = true;
-                }
+                inventoryUi.OpenDropdownMenu(parent.inventory.inventory[index].GetInteractionOptions());
+                /*inventoryUi.OpenDropdownMenu(new DropdownOption[] {
+                    new DropdownOption("Use", null),
+                    new DropdownOption("Equip", null),
+                    new DropdownOption("Examine", null),
+                    new DropdownOption("Drop", null),
+                });*/
             }
-            //If Dragging
-            if(isDragging)
+        }
+
+        //Ignore any other actions
+        if(inventoryUi.currentlyOpenDropdown)
+        {
+            if(Input.GetMouseButtonDown(0) || Input.GetMouseButtonUp(1))
             {
-                draggingImage.transform.position = Input.mousePosition;
+                //Select the current button option
+                DropdownButton.hoveredButton?.OnClick();
+                //Close the dropdown
+                inventoryUi.CloseDropdownMenu();
             }
-            //End Dragging
-            if(Input.GetMouseButtonUp(0) && isDragging)
+            return;
+        }
+
+        //===== Drag Handling =====
+        //Todo: Dragging from the hotbar too
+        if(Input.GetMouseButtonDown(0) && !isDragging)
+        {
+            //Get the pointer position
+            Vector3 pointerPosition = Input.mousePosition;
+            //Find the index of what we are over
+            int index = InventoryUi.CursorPositionToIndex(pointerPosition.x, pointerPosition.y);
+            //Check if something is even there
+            if(index != -1 && parent.inventory.inventory[index] != null)
             {
-                //Reset the image
-                draggingImage.transform.localPosition = startingDragImagePosition;
-                draggingImage = null;
-                isDragging = false;
-                //Apply effects of the drag
-                //Get the pointer position
-                Vector3 pointerPosition = Input.mousePosition;
-                //Find the index of what we are over
-                int index = InventoryUi.CursorPositionToIndex(pointerPosition.x, pointerPosition.y);
-                if(index != -1 && parent.inventory.inventory[index] == null)
+                //Find the image we are dragging
+                draggingImage = inventoryUi.GetComponentsInChildren<Image>()[index * 2 + 1];
+                startingDragImagePosition = draggingImage.transform.localPosition;
+                dragStartIndex = index;
+                //Begin dragging
+                isDragging = true;
+            }
+        }
+        //If Dragging
+        if(isDragging)
+        {
+            draggingImage.transform.position = Input.mousePosition;
+        }
+        //End Dragging
+        if(Input.GetMouseButtonUp(0) && isDragging)
+        {
+            //Reset the image
+            draggingImage.transform.localPosition = startingDragImagePosition;
+            draggingImage = null;
+            isDragging = false;
+            //Apply effects of the drag
+            //Get the pointer position
+            Vector3 pointerPosition = Input.mousePosition;
+            //Find the index of what we are over
+            int index = InventoryUi.CursorPositionToIndex(pointerPosition.x, pointerPosition.y);
+            if(index != -1 && parent.inventory.inventory[index] == null)
+            {
+                parent.inventory.SwapInventoryIndexes(dragStartIndex, index);
+            }
+            else
+            {
+                //Check for putting into the hotbar
+                int hotbarRequest = InventoryUi.CursorPositionToHotbarIndex(hotbarParent, pointerPosition.x, pointerPosition.y);
+                if(hotbarRequest != -1)
                 {
-                    parent.inventory.SwapInventoryIndexes(dragStartIndex, index);
+                    Log.PrintDebug($"{hotbarRequest}");
+                    parent.inventory.InsertIntoHotbar(hotbarRequest, dragStartIndex);
                 }
                 else
                 {
-                    //Check for putting into the hotbar
-                    int hotbarRequest = InventoryUi.CursorPositionToHotbarIndex(hotbarParent, pointerPosition.x, pointerPosition.y);
-                    if(hotbarRequest != -1)
-                    {
-                        Log.PrintDebug($"{hotbarRequest}");
-                        parent.inventory.InsertIntoHotbar(hotbarRequest, dragStartIndex);
-                    }
-                    else
-                    {
-                        //Dragged onto blank space, assume user wants to drop the item.
-                        parent.inventory.DropItemAtIndex(dragStartIndex);
-                    }
+                    //Dragged onto blank space, assume user wants to drop the item.
+                    parent.inventory.DropItemAtIndex(dragStartIndex);
                 }
             }
         }
@@ -126,45 +168,58 @@ public class PlayerUserInterfaceModule : PlayerModule
     /// <param name="parent"></param>
     private void HandleHotbarButtons(Player parent)
     {
+        //Ignore checks if no buttons are down.
+        if(!Input.anyKeyDown)
+            return;
         if(Input.GetButtonDown("hb1"))
         {
             parent.inventory.SetHotbarIndex(hotbarParent, 0);
+            return;
         }
         if(Input.GetButtonDown("hb2"))
         {
             parent.inventory.SetHotbarIndex(hotbarParent, 1);
+            return;
         }
         if(Input.GetButtonDown("hb3"))
         {
             parent.inventory.SetHotbarIndex(hotbarParent, 2);
+            return;
         }
         if(Input.GetButtonDown("hb4"))
         {
             parent.inventory.SetHotbarIndex(hotbarParent, 3);
+            return;
         }
         if(Input.GetButtonDown("hb5"))
         {
             parent.inventory.SetHotbarIndex(hotbarParent, 4);
+            return;
         }
         if(Input.GetButtonDown("hb6"))
         {
             parent.inventory.SetHotbarIndex(hotbarParent, 5);
+            return;
         }
         if(Input.GetButtonDown("hb7"))
         {
             parent.inventory.SetHotbarIndex(hotbarParent, 6);
+            return;
         }
         if(Input.GetButtonDown("hb8"))
         {
             parent.inventory.SetHotbarIndex(hotbarParent, 7);
+            return;
         }
         if(Input.GetButtonDown("hb9"))
         {
             parent.inventory.SetHotbarIndex(hotbarParent, 8);
+            return;
         }
         if(Input.GetButtonDown("hb0"))
         {
             parent.inventory.SetHotbarIndex(hotbarParent, 9);
+            return;
         }
     }
 

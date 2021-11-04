@@ -22,7 +22,7 @@ public class NetworkMaster : Subsystem
         Request("MasterConnect", new ServerConnectSettings("Test1", true));
     }
 
-    protected override void Update()
+    protected override void Update(float processingTime)
     {
 
         //Handle subsystem queries
@@ -67,6 +67,7 @@ public class NetworkMaster : Subsystem
                 //Debug create blob
                 Entity.CreateEntity(typeof(Blob), new Vector3(0, 2.0f, 0), Quaternion.identity);
                 Entity.CreateEntity(typeof(Blob), new Vector3(1.0f, 2.0f, 0), Quaternion.identity);
+                Entity.CreateEntity(typeof(Mob), new Vector3(11, 2.0f, 11), Quaternion.identity);
                 break;
 
             case "OnPlayerEnteredRoom":

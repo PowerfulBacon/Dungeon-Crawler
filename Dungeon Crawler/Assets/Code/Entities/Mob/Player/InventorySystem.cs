@@ -34,7 +34,7 @@ public class InventorySystem
     /// Adds an item to the players inventory.
     /// </summary>
     /// <param name="item">An item. We should have control of it at this point.</param>
-    public void AddItemToInventory(Item item)
+    public bool AddItemToInventory(Item item)
     {
         Log.PrintDebug("Added item to inventory.");
         //Go and check free inventory slot
@@ -43,13 +43,14 @@ public class InventorySystem
             if(inventory[i] == null)
             {
                 inventory[i] = item;
+                item.inventorySlot = i;
                 //Horray, add the icon
                 UpdateInventoryIcon(i);
-                return;
+                return true;
             }
         }
         //Error, drop the item.
-        Log.PrintError("Inventory is full, failed to insert item.");
+        return false;
     }
 
     /// <summary>
@@ -65,6 +66,7 @@ public class InventorySystem
             if(inventory[i] == item)
             {
                 inventory[i] = null;
+                item.inventorySlot = -1;
                 //Remove item from hotbar
                 RemoveIndexFromHotbar(i, true);
                 //Horray, add the icon
@@ -98,6 +100,11 @@ public class InventorySystem
         InventoryItemMoved(b, a);
         inventory[b] = temp;
         InventoryItemMoved(a, b);
+        //Update indexes
+        if(inventory[b])
+            inventory[b].inventorySlot = b;
+        if(inventory[a])
+            inventory[a].inventorySlot = a;
         //Update icons
         UpdateInventoryIcon(a);
         UpdateInventoryIcon(b);
@@ -138,7 +145,6 @@ public class InventorySystem
 
     public void UpdateHotbarSelected(Hotbar inventory)
     {
-        Log.Print($"{previousIndex} to {hotbarNum}");
         inventory.GetComponentsInChildren<Image>()[previousIndex * 2].color = COLOUR_HOTBAR_DEFAULT;
         inventory.GetComponentsInChildren<Image>()[hotbarNum * 2].color = COLOUR_HOTBAR_SELECTED;
         previousIndex = hotbarNum;

@@ -53,6 +53,7 @@ public class Master : MonoBehaviour
         subsystems.Add("levelGeneration", new LevelGenerator("levelGenerator"));
         subsystems.Add("networkManagement", new NetworkMaster("networkMaster"));
         subsystems.Add("entities", new EntitySubsystem("entities"));
+        subsystems.Add("pathfinding", new Pathfinding("pathfinding"));
     }
 
 }

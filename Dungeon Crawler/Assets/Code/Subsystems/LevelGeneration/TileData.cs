@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public struct TempTileData
+public struct TileData
 {
 
     public int x;

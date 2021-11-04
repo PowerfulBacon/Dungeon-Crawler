@@ -14,6 +14,7 @@ public class Blob : Item
         itemName = "blobous mass";
         iconName = "blob";
         model = "blob";
+        description = "An orange, blobous mass. It has large googly eyes, a mouth and some kind of reproductive organ.";
     }
 
 }

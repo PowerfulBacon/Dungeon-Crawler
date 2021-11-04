@@ -18,13 +18,13 @@ public class EntitySubsystem : Subsystem
     {
     }
 
-    protected override void Update()
+    protected override void Update(float processingTime)
     {
         foreach (Entity entity in entities)
         {
             try
             {
-                entity.OnUpdate();
+                entity.OnUpdate(processingTime);
             }
             catch(Exception e)
             {

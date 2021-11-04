@@ -736,7 +736,7 @@ GameObject:
   - component: {fileID: 207147542}
   - component: {fileID: 207147541}
   m_Layer: 0
-  m_Name: GameObject
+  m_Name: Ownership callback watcher
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1052,7 +1052,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
   m_Color: {r: 0.8301887, g: 0.8301887, b: 0.8301887, a: 1}
-  m_RaycastTarget: 1
+  m_RaycastTarget: 0
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
@@ -1198,6 +1198,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0838a64c3dcc8664889857ceb67a8920, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  dropdownMenuPrefab: {fileID: 1702077538070485895, guid: ec47c33ee1f41cd408f241a1841bb0df,
+    type: 3}
+  currentlyOpenDropdown: {fileID: 0}
 --- !u!222 &442708481
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -1318,7 +1321,7 @@ Camera:
   m_Enabled: 1
   serializedVersion: 2
   m_ClearFlags: 1
-  m_BackGroundColor: {r: 0.09433961, g: 0.09433961, b: 0.09433961, a: 0}
+  m_BackGroundColor: {r: 0, g: 0, b: 0, a: 0}
   m_projectionMatrixMode: 1
   m_GateFitMode: 2
   m_FOVAxisMode: 0

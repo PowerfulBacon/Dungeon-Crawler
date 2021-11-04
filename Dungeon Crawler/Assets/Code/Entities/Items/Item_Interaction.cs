@@ -13,6 +13,7 @@ public partial class Item : Entity
 
     //======== ATTACK STUFF =========
 
+    public DamageType damageType { get; set; } = DamageType.Blunt;
     public int force { get; set; } = 0;
 
     //In seconds
@@ -66,6 +67,28 @@ public partial class Item : Entity
     //Called when item is used by holder (Inventory > Use)
     public virtual void OnUse(Mob m)
     {
+    }
+
+    /// <summary>
+    /// Returns a list of the dropdown options to display when right clicked on.
+    /// </summary>
+    /// <returns></returns>
+    public virtual DropdownOption[] GetInteractionOptions()
+    {
+        return new DropdownOption[] {
+            new DropdownOption("Equip", EquipItem),
+            new DropdownOption("Examine", ExamineItem),
+            new DropdownOption("Drop", DropItem),
+        };
+    }
+
+    /// <summary>
+    /// Callback to equip the item
+    /// </summary>
+    private void EquipItem()
+    {
+        Player.myPlayer.inventory.InsertIntoHotbar(Player.myPlayer.inventory.hotbarNum, inventorySlot);
+        //Player.myPlayer.SetHeldItem(this, false);
     }
 
 }

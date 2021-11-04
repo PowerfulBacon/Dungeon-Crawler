@@ -10,6 +10,11 @@ public class LevelGenerator : Subsystem
 
     public static int currentSeed;
 
+    /// <summary>
+    /// Current level generated
+    /// </summary>
+    public static Level current;
+
     Resource levelResources;
 
     MonoLevelMaster levelMaster;
@@ -27,7 +32,7 @@ public class LevelGenerator : Subsystem
     }
 
 
-    protected override void Update()
+    protected override void Update(float processingTime)
     {
 
         if (subsystemQuery.Keys.Count <= 0)
@@ -41,7 +46,7 @@ public class LevelGenerator : Subsystem
         switch (queryName)
         {
             case "generateLevel":
-                GenerateLevel((int)((object[])queryData)[0], (int)((object[])queryData)[1]);
+                current = GenerateLevel((int)((object[])queryData)[0], (int)((object[])queryData)[1]);
                 break;
         }
 
@@ -58,7 +63,7 @@ public class LevelGenerator : Subsystem
         Log.ServerMessage("Generating this might take a while for large levels...");
 
         //Create level holder thingy
-        Level level = new Level(levelSize, levelSize);
+        Level level = new Level(levelSize);
 
         //Set the seed
         Random.InitState(seed);
@@ -73,7 +78,7 @@ public class LevelGenerator : Subsystem
         tempObject.SetActive(false);
 
         //Generate the walls and rooms and shit
-        var activeLayer = GenerateActiveLayer(levelSize);
+        Turf[,] activeLayer = GenerateActiveLayer(levelSize);
 
         for (int x = 0; x < levelSize; x++)
         {
@@ -85,24 +90,39 @@ public class LevelGenerator : Subsystem
                     currentVertexCount = 0;
                 }
 
-                //Load the cube
-                GameObject tempChild = new GameObject();
-                tempChild.transform.SetParent(tempObject.transform);
-                var f = tempChild.AddComponent<MeshFilter>();
-                f.sharedMesh = objectMesh.sharedMesh;
-                f.transform.position = new Vector3(x * 2, 0, y * 2);
-                f.transform.localScale = new Vector3(2, 2, 2);
-                currentVertexCount += objectMesh.sharedMesh.vertexCount;
+                //Load the floor
+                if(activeLayer[x, y].hasFloor)
+                {
+                    GameObject tempChild = new GameObject();
+                    tempChild.transform.SetParent(tempObject.transform);
+                    MeshFilter f = tempChild.AddComponent<MeshFilter>();
+                    f.sharedMesh = objectMesh.sharedMesh;
+                    f.transform.position = new Vector3(x * 2, 0, y * 2);
+                    f.transform.localScale = new Vector3(2, 2, 2);
+                    currentVertexCount += objectMesh.sharedMesh.vertexCount;
+                }
 
-                //Load the cube
+                //Load the wall
                 if (activeLayer[x, y].occupied)
                 {
                     GameObject middleLayer = new GameObject();
                     middleLayer.transform.SetParent(tempObject.transform);
                     var middleFilter = middleLayer.AddComponent<MeshFilter>();
                     middleFilter.sharedMesh = objectMesh.sharedMesh;
-                    middleFilter.transform.position = new Vector3(x * 2, 1 * 2, y * 2);
+                    middleFilter.transform.position = new Vector3(x * 2, 2, y * 2);
                     middleFilter.transform.localScale = new Vector3(2, 2, 2);
+                    currentVertexCount += objectMesh.sharedMesh.vertexCount;
+                }
+
+                //Load the ceiling
+                if(activeLayer[x, y].hasCeiling)
+                {
+                    GameObject tempChild = new GameObject();
+                    tempChild.transform.SetParent(tempObject.transform);
+                    MeshFilter f = tempChild.AddComponent<MeshFilter>();
+                    f.sharedMesh = objectMesh.sharedMesh;
+                    f.transform.position = new Vector3(x * 2, 4, y * 2);
+                    f.transform.localScale = new Vector3(2, 2, 2);
                     currentVertexCount += objectMesh.sharedMesh.vertexCount;
                 }
             }
@@ -110,8 +130,12 @@ public class LevelGenerator : Subsystem
 
         GenerateCombinedMeshes(currentVertexCount);
 
-        return null;
+        level.turfs = activeLayer;
 
+        //Setup pathfinding
+        Master.subsystems["pathfinding"].Request("SetWorldConditions");
+
+        return level;
     }
 
 
@@ -138,10 +162,10 @@ public class LevelGenerator : Subsystem
         //Populate array with default values
         for (int x = 0; x < size; x++)
             for (int y = 0; y < size; y ++)
-                turfs[x, y] = new Turf();
+                turfs[x, y] = new Turf(x, y);
 
-        List<TempTileData> tilesToProcess = new List<TempTileData>();
-        TempTileData initialRoom = new TempTileData();
+        List<TileData> tilesToProcess = new List<TileData>();
+        TileData initialRoom = new TileData();
         initialRoom.connection_x = 1;
         initialRoom.connection_y = 0;
         initialRoom.x = size / 2;
@@ -185,13 +209,15 @@ public class LevelGenerator : Subsystem
                 //Debug.Log("[" + tile.x + "]" + "[" + tile.y + "] : Added turf, type : [" + tile.type + "]" + (tile.type == "wall").ToString()); //DEBUG, REMOVE WHEN DONE
                 turfs[tile.x, tile.y].calculated = true;
                 turfs[tile.x, tile.y].occupied = tile.type == "wall";
+                turfs[tile.x, tile.y].hasCeiling = tile.type != "sky";
+                turfs[tile.x, tile.y].hasFloor = tile.type != "pit";
                 turfs[tile.x, tile.y].turfMesh = objectMesh.sharedMesh;
                 if (tile.door_dir_x != 0 || tile.door_dir_y != 0)
                     turfs[tile.x, tile.y].door = true;
 
                 if (tile.door_dir_x != 0 || tile.door_dir_y != 0)
                 {
-                    TempTileData data = new TempTileData();
+                    TileData data = new TileData();
                     data.x = tile.x;
                     data.y = tile.y;
                     data.connection_x = tile.door_dir_x;

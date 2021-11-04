@@ -17,13 +17,16 @@ public partial class Item : Entity
 
     public string itemName { get; set; } = "generic";
 
+    public string description = "No description set.";
+
     private static float itemFallSpeed = 2.0f;
 
     private PhotonTransformView viewTransform;
 
-    /// <summary>
+    /// The slot of the players inventory this item is inside.
+    public int inventorySlot = -1;
+
     /// The name of the icon we are using (located in resources.)
-    /// </summary>
     public string iconName = "icon_blank";
 
     public override void OnInitialise()

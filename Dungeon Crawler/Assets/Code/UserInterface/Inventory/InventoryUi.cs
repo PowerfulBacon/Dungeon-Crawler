@@ -6,6 +6,11 @@ using UnityEngine.UI;
 public class InventoryUi : MonoBehaviour
 {
 
+    [SerializeField]
+    private DropdownMenuBox dropdownMenuPrefab;
+
+    public DropdownMenuBox currentlyOpenDropdown;
+
     //WARNING: UNTESTED FOR OTHER VALUES
     //THERE SHOULD BE NO REASON TO CHANGE THESE THOUGH
     private const int UI_CENTER_X = 0;
@@ -41,6 +46,40 @@ public class InventoryUi : MonoBehaviour
         SetOpen(false);
     }
 
+    /// <summary>
+    /// Opens a dropdown menu at the mouse cursors position.
+    /// </summary>
+    /// <param name="options"></param>
+    public void OpenDropdownMenu(DropdownOption[] options)
+    {
+        if(currentlyOpenDropdown)
+        {
+            Destroy(currentlyOpenDropdown.gameObject);
+        }
+        //Get the pointer position
+        Vector3 pointerPosition = Input.mousePosition;
+        //Create the dropdown
+        DropdownMenuBox createdDropdown = Instantiate<DropdownMenuBox>(dropdownMenuPrefab, transform);
+        createdDropdown.transform.position = pointerPosition;
+        createdDropdown.SetOptions(options);
+        currentlyOpenDropdown = createdDropdown;
+    }
+
+    /// <summary>
+    /// Closes the currently open dropdown menu.
+    /// </summary>
+    public void CloseDropdownMenu()
+    {
+        if(!currentlyOpenDropdown)
+            return;
+        Destroy(currentlyOpenDropdown.gameObject);
+        currentlyOpenDropdown = null;
+    }
+
+    /// <summary>
+    /// Sets the open state of the inventory ui.
+    /// </summary>
+    /// <param name="opened"></param>
     public void SetOpen(bool opened)
     {
         foreach(Image subComponent in GetComponentsInChildren<Image>())
@@ -86,9 +125,11 @@ public class InventoryUi : MonoBehaviour
 
     /// <summary>
     /// Converts a mouse position into index of the hotbar.
+    /// Returns -1 if the mouse isn't over any hotbar buttons.
     /// I am going to be lazy with this one and use an inefficient loop rather than maths.
     /// O(N) instead of O(1) but literally who cares. (I do otherwise I wouldn't be writting this.)
     /// TODO: This method is awful and needs revising but I will probably never end up doing it :^).
+    /// 17/09/2021: seriously now just use a div function.
     /// </summary>
     /// <param name="cursorX"></param>
     /// <param name="cursorY"></param>

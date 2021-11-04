@@ -49,7 +49,7 @@ public class Subsystem
         while (true)
         {
             long startTime = DateTime.Now.Ticks / (TimeSpan.TicksPerMillisecond / 1000);
-            Update();
+            Update(processingTime);
             long endTime = DateTime.Now.Ticks / (TimeSpan.TicksPerMillisecond / 1000);
             processingTime = (endTime - startTime) / 1000000.0f;
             if (processingTime >= timeBetweenUpdates)
@@ -59,7 +59,7 @@ public class Subsystem
         }
     }
 
-    protected virtual void Update()
+    protected virtual void Update(float processingTime)
     {
 
     }

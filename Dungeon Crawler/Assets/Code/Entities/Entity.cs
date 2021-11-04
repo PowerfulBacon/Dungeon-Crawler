@@ -33,13 +33,29 @@ public class Entity : MonoBehaviourPunCallbacks
         ClientInit();
     }
 
+    //Generic unity update handler hook
     private void Update()
     {
+        LocalUpdate();
+        //Update for the owner
         if(photonView.IsMine)
         {
             OwnerUpdate();
         }
     }
+
+    /// <summary>
+    /// Performs a local update.
+    /// This should be for rendering updates, happens if we own the object or not.
+    /// </summary>
+    protected virtual void LocalUpdate()
+    { }
+
+    /// <summary>
+    /// Called if we own this object.
+    /// </summary>
+    protected virtual void OwnerUpdate()
+    { }
 
     protected virtual void ClientInit()
     { }
@@ -57,9 +73,6 @@ public class Entity : MonoBehaviourPunCallbacks
         //Hitbox
         gameObject.AddComponent<BoxCollider>();
     }
-
-    protected virtual void OwnerUpdate()
-    { }
 
     // ==========================
     // Creator helpers.
@@ -91,13 +104,27 @@ public class Entity : MonoBehaviourPunCallbacks
     }
 
     /// <summary>
+    /// Destroys the entity if we have access to it.
+    /// </summary>
+    public virtual void Destroy()
+    {
+        if(!photonView.IsMine)
+        {
+            Log.PrintError($"Attempted to destroy {ToString()} but do not have ownership.");
+            return;
+        }
+        //Destroy.
+        PhotonNetwork.Destroy(photonView);
+    }
+
+    /// <summary>
     /// Called every update by the server.
     /// Note that its called by the server even if the server does not have control over the object.
     /// Should not be used for things like inputs, but checking if the player is dead etc.
     /// 
     /// REQUIRES PROCESSING TO BE STARTED OR THIS WILL NOT RUN!
     /// </summary>
-    public virtual void OnUpdate()
+    public virtual void OnUpdate(float deltaTime)
     {
 
     }

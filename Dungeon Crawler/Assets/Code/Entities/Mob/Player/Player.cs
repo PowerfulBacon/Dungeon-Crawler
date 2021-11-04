@@ -39,12 +39,13 @@ public class Player : Mob
 
     // Update is called once per frame
     // * > CLIENT UPDATES < *
-    void Update()
+    protected override void OwnerUpdate()
     {
 
-        if (!photonView.IsMine)
-            return;
+        //Call the super update
+        base.OwnerUpdate();
 
+        //Update our modules.
         foreach (PlayerModule module in modules)
         {
             module.OnUpdate(this);

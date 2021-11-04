@@ -151,6 +151,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   model: icon_blank
+  factions: []
   heldItem: {fileID: 0}
 --- !u!108 &-5344203123784174714
 Light:
@@ -163,8 +164,8 @@ Light:
   serializedVersion: 9
   m_Type: 2
   m_Color: {r: 0.6431373, g: 0.42745098, b: 0.08235294, a: 1}
-  m_Intensity: 1.4
-  m_Range: 14
+  m_Intensity: 3.3
+  m_Range: 22
   m_SpotAngle: 30
   m_InnerSpotAngle: 21.80208
   m_CookieSize: 10

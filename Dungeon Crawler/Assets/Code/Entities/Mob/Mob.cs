@@ -7,11 +7,22 @@ using UnityEngine;
 public partial class Mob : Entity
 {
 
+    //Server only variable
+    //Tracks the number of mobs
+    //Allows for each mob to be assigned a unique ID
     private static int playerNumbers = 0;
     //Server only!
+    //A static dictionary that allows for looking up mobs by their unique ID
+    //TODO: On destroy remove from this list.
     private static Dictionary<int, Mob> mobLookup = new Dictionary<int, Mob>();
 
-    protected bool dead = false;
+    //The client in control of this mob.
+    //TODO Client
+    public ConnectedUser client;
+
+    //Server variable
+    //Factions this mob is a part of
+    public string[] factions;
 
     /// <summary>
     /// Serverside init.
@@ -56,6 +67,18 @@ public partial class Mob : Entity
     public static Mob GetMobById(int mobId)
     {
         return mobLookup[mobId];
+    }
+
+    /// <summary>
+    /// Owner update that handles automated mob actions.
+    /// </summary>
+    protected override void OwnerUpdate()
+    {
+        //Update AI
+        if(client == null)
+        {
+            HandleMobAction();
+        }
     }
 
 }

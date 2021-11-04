@@ -129,8 +129,8 @@ public partial class Item : Entity
             Log.PrintError("myPlayer is null");
             return;
         }
-        Player.myPlayer.inventory.AddItemToInventory(this);
-        OnPickup(Player.myPlayer);
+        if(Player.myPlayer.inventory.AddItemToInventory(this))
+            OnPickup(Player.myPlayer);
     }
 
     /// <summary>

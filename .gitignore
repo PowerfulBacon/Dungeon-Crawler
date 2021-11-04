@@ -42,3 +42,4 @@ Dungeon Crawler/.vs/Dungeon Crawler/v15/Server/sqlite3/storage.ide
 *.ide-wal
 *.lock
 /Dungeon Crawler/.vs
+*.log

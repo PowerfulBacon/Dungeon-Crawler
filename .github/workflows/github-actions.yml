@@ -5,7 +5,7 @@ jobs:
   Run-Unity-Tests:
     runs-on: ubuntu-latest
     env:
-        working-directory: './Dungeon Crawler'
+        working-directory: 'Dungeon Crawler'
     steps:
         working-directory: ${{env.working-directory}}
       - name: Unity - Test runner

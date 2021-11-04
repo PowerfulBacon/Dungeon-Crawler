@@ -6,5 +6,5 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Unity - Test runner
-        working-directory: ./Dungeon Crawler
+        working-directory: './Dungeon Crawler'
         uses: game-ci/unity-test-runner@v2.0-alpha-6

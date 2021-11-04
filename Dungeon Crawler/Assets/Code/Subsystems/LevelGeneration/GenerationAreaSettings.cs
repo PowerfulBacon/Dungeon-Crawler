@@ -121,7 +121,7 @@ public class GenerationAreaSettings
                 }
                 catch
                 {
-                    Debug.Log(turfs.GetLength(0) + "," + tiles.x + "," + tiles.y);
+                    Log.ServerMessage(turfs.GetLength(0) + "," + tiles.x + "," + tiles.y);
                     roomValid = false;
                     break;
                 }

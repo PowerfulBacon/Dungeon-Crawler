@@ -13,14 +13,19 @@ public class NetworkMaster : Subsystem
 
     public ServerConnector serverConnector = new ServerConnector();
 
+    public NetworkMaster(string name = "") : base(name)
+    {
+    }
+
     public override void Initialise()
     {
         Request("MasterConnect", new ServerConnectSettings("Test1", true));
     }
 
-    protected override void Update()
+    protected override void Update(float processingTime)
     {
 
+        //Handle subsystem queries
         if (subsystemQuery.Keys.Count <= 0)
             return;
 
@@ -36,38 +41,56 @@ public class NetworkMaster : Subsystem
                 break;
 
             case "OnConnectedToMaster":
-                Debug.Log("Connected to master server!");
+                Log.ServerMessage("Connected to master server!");
                 //Debug join random room
                 Request("ServerConnect", new ServerConnectSettings("default", true));
                 break;
 
             case "ServerConnect":
-                Debug.Log("Attempting to create server");
+                Log.ServerMessage("Attempting to create server");
                 serverConnector.ConnectToServer((ServerConnectSettings)queryData);
                 break;
 
             case "OnCreatedRoom":
                 //Execute the onPlayerEnteredCode and anything else
                 if (!PhotonNetwork.IsMasterClient)
-                    return;
+                    break;
+                Log.ServerMessage("Instantiating Player");
+                //Create outselves a player
+                //Normally we shouldn't instantiate like this and use our helpers, but we need to transfer shit. (Actually we should use the other method, this is kinda shitcodey)
+                var cooObject = PhotonNetwork.Instantiate("NetworkPrefab/Player", new Vector3(0, 2.75f, 0), Quaternion.identity, 0);
+                Player.myPlayer = cooObject.GetComponent<Player>();
+                Player.myPlayer.OnInitialise();
+                //Generate a random seed for the level
                 LevelGenerator.currentSeed = Random.Range(0, 1000000000);
-                goto playerEnteredRoom;
+                Master.subsystemMaster.RPCGenerateLevel(LevelGenerator.currentSeed, 64);
+                //Debug create blob
+                Entity.CreateEntity(typeof(Blob), new Vector3(0, 2.0f, 0), Quaternion.identity);
+                Entity.CreateEntity(typeof(Blob), new Vector3(1.0f, 2.0f, 0), Quaternion.identity);
+                Entity.CreateEntity(typeof(Mob), new Vector3(11, 2.0f, 11), Quaternion.identity);
+                break;
 
             case "OnPlayerEnteredRoom":
-                //Create a player just for them <3 
+                //Create a player just for them <3
+                Log.ServerMessage("Instantiating Player"); 
                 var instantiatedObject = PhotonNetwork.Instantiate("NetworkPrefab/Player", new Vector3(0, 2.75f, 0), Quaternion.identity, 0);
+                instantiatedObject.GetComponent<Player>().OnInitialise();
                 instantiatedObject.GetPhotonView().TransferOwnership((Photon.Realtime.Player)queryData);
-
-                playerEnteredRoom:
-                //Create a new player holder for the person
-                if (!PhotonNetwork.IsMasterClient)
-                    break;
                 //Ask them to generate the level
-                Master.subsystemMaster.photonView.RPC("RPCGenerateLevel", RpcTarget.All, LevelGenerator.currentSeed, 64);
+                Master.subsystemMaster.photonView.RPC("RPCGenerateLevel", (Photon.Realtime.Player)queryData, LevelGenerator.currentSeed, 64);
+                //Full update all objects
+                foreach(Entity entity in Object.FindObjectsOfType<Entity>())
+                {
+                    entity.SendAllVars((queryData as Photon.Realtime.Player));
+                }
+                break;
+            
+            case "OnJoinedRoom":
+                Log.ServerMessage("Connected to room.");
                 break;
 
             default:
-                Debug.LogError("Unrecognised query [" + queryName + "] in networkGenerator, deleting");
+                Log.PrintError($"Unrecognised query [{queryName}] in networkGenerator, deleting");
                 break;
         }
 

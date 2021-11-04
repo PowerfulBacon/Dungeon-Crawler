@@ -678,6 +678,12 @@ namespace Photon.Pun
             return obj;
         }
 
+        //Has next thing in steam (NOT DEFAULT PUN FUNCTION) -Jake
+        public bool HasNext()
+        {
+            return this.currentItem < this.readData.Length;
+        }
+
         /// <summary>Read next piece of data from the stream without advancing the "current" item.</summary>
         public object PeekNext()
         {

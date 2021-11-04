@@ -5,18 +5,13 @@ using UnityEngine;
 public class Level
 {
 
-    //The amount of z layers there are
-    //Ground
-    //Walls
-    //Ceiling
-    //Raised ceiling
-    public const int Z_LAYERS = 4;
+    public Turf[,] turfs;
+    public int levelSize;
 
-    public Turf[,,] turfs;
-
-    public Level(int xSize, int ySize)
+    public Level(int levelSize)
     {
-        turfs = new Turf[xSize, ySize, Z_LAYERS];
+        this.levelSize = levelSize;
+        turfs = new Turf[levelSize, levelSize];
     }
 
 }

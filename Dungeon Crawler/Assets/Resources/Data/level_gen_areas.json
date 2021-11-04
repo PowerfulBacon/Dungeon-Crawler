@@ -311,4 +311,62 @@
 			"type":"wall"
 		},
 	]
+},
+"area":{
+	"name":"pit_room",
+	"probability":1,
+	"type":"hall",
+	"width":3,
+	"height":3,
+	"tiles":[
+		{
+			"x":0
+			"y":0
+			"type":"pit"
+		},
+		{
+			"x":1
+			"y":0
+			"door_dir_y":-1
+			"type":"floor"
+		},
+		{
+			"x":2
+			"y":0
+			"type":"pit"
+		},
+		{
+			"x":0
+			"y":1
+			"door_dir_x":-1
+			"type":"floor"
+		},
+		{
+			"x":1
+			"y":1
+			"type":"floor"
+		},
+		{
+			"x":2
+			"y":1
+			"door_dir_x":1
+			"type":"floor"
+		},
+		{
+			"x":0
+			"y":2
+			"type":"pit"
+		},
+		{
+			"x":1
+			"y":2
+			"type":"floor"
+			"door_dir_y":1
+		},
+		{
+			"x":2
+			"y":2
+			"type":"pit"
+		},
+	]
 }

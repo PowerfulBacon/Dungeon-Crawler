@@ -28,3 +28,4 @@ as this is the config currently being used on the repository to generate .obj fi
 
 ### Licence
 I haven't decided the licence yet so for legal reasons or whatever I own all the copyright for the code here and have the right to change it to whatever licence that gets decided on being used. (Yea, this is terrible but I am terrible with licences and I'm the only one working here atm anyway and don't plan to expand until there is stuff to expand)
+This probably isn't legally enforcable either idk, idrc atm

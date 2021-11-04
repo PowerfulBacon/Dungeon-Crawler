@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using Dungeon_Crawler;
 
-class PathfindingRequest
+public class PathfindingRequest
 {
 
     public delegate void OnPathfindingCompletion(Path foundPath);

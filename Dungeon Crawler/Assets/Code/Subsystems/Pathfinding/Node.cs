@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-class Node
+public class Node
 {
 
     //I don't really get why they need getter and setters when they can be public, but its a good practise.

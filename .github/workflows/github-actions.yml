@@ -1,7 +1,4 @@
 
-defaults:
-    run:
-        working-directory: Dungeon Crawler
 name: Run Unity Tests
 on: [push]
 jobs:
@@ -10,3 +7,5 @@ jobs:
     steps:
       - name: Unity - Test runner
         uses: game-ci/unity-test-runner@v2.0-alpha-6
+        with:
+            path: ./Dungeon Crawler

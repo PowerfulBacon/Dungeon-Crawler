@@ -5,7 +5,8 @@
 2021.1.15f1
 
 ## Getting Started
-Download the project and open in Unity. You may need to install Unity Version 2021.1.15f1
+Download the project and open in Unity. You may need to install Unity Version 2021.1.15f1.
+You will need to go to Window > Photon Unity Networking and run the setup wizard, providing a project ID for a create PUN application. (You will need to create this for testing)
 
 ## Contribution Guide
 All contributions are welcome, contribute anything you want. Stuff on the projects page will be accepted always if the code is good, stuff on there may be accepted or rejected depending on how good the idea is.

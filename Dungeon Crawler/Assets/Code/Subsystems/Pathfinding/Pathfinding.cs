@@ -6,8 +6,11 @@ using System.Text;
 using Dungeon_Crawler;
 using UnityEngine;
 
-class Pathfinding : Subsystem
+public class Pathfinding : Subsystem
 {
+
+    //Size of the pathfinding world
+    private int worldSize;
 
     public static Node[,] worldNodes;
 
@@ -62,12 +65,13 @@ class Pathfinding : Subsystem
     /// </summary>
     public void SetWorldConditions()
     {
+        worldSize = LevelGenerator.current.levelSize;
         //Setup the world nodes
-        worldNodes = new Node[LevelGenerator.current.levelSize, LevelGenerator.current.levelSize];
+        worldNodes = new Node[worldSize, worldSize];
         //Fill the world nodes array with default values
-        for (int x = 0; x < LevelGenerator.current.levelSize; x++)
+        for (int x = 0; x < worldSize; x++)
         {
-            for (int y = 0; y < LevelGenerator.current.levelSize; y++)
+            for (int y = 0; y < worldSize; y++)
             {
                 //Console.WriteLine($"Setting up {x}, {y}");
                 Node newNode = new Node(x, y);
@@ -97,7 +101,7 @@ class Pathfinding : Subsystem
     /// This is probably a pretty ineffecient implementation but its on a seperate thread, gets the job done and isn't too critical for the project.
     /// </summary>
     /// <param name="request"></param>
-    public void CalculatePath(PathfindingRequest request)
+    public bool CalculatePath(PathfindingRequest request)
     {
         pathId++;
         //The list of nodes that can be searched
@@ -141,17 +145,19 @@ class Pathfinding : Subsystem
                 List<Node> quickestPath = testingNode.GetRecursiveNodes();
                 List<Turf> pathTurfs = new List<Turf>();
                 Log.PrintDebug($"Found path length: {quickestPath.Count}");
+#if !UNITY_INCLUDE_TESTS
                 foreach(Node node in quickestPath)
                 {
                     Turf locatedBase = LevelGenerator.current.turfs[node.x, node.y];
                     pathTurfs.Add(locatedBase);
                 }
+#endif
                 Path finalPath = new Path();
                 finalPath.calculatedRoute = pathTurfs;
                 request.CompletePath(finalPath);
                 timer.Stop();
                 Log.PrintDebug($"Found path in {timer.ElapsedMilliseconds}ms");
-                return;
+                return true;
             }
             //Add surrounding nodes
             AddSurroundingNodes(ref searchNodes, testingNode, request);
@@ -164,6 +170,7 @@ class Pathfinding : Subsystem
         request.FailPath();
         Log.PrintDebug("No path was found");
         Log.PrintDebug($"Failed to find path in {timer.ElapsedMilliseconds}ms");
+        return false;
     }
 
     /// <summary>
@@ -268,7 +275,7 @@ class Pathfinding : Subsystem
         List<Node> nodes = new List<Node>();
         //Check that we aren't on the border of the world and add the adjacent node.
         //Checks for left, right, up, down.
-        if (origin.x != LevelGenerator.current.levelSize - 1)
+        if (origin.x != worldSize - 1)
         {
             nodes.Add(worldNodes[origin.x + 1, origin.y]);
         }
@@ -276,7 +283,7 @@ class Pathfinding : Subsystem
         {
             nodes.Add(worldNodes[origin.x - 1, origin.y]);
         }
-        if (origin.y != LevelGenerator.current.levelSize - 1)
+        if (origin.y != worldSize - 1)
         {
             nodes.Add(worldNodes[origin.x, origin.y + 1]);
         }
@@ -285,6 +292,44 @@ class Pathfinding : Subsystem
             nodes.Add(worldNodes[origin.x, origin.y - 1]);
         }
         return nodes;
+    }
+
+    /**
+     * Runs a pathfinding test on a simple world with a ] shape.
+     */
+    public bool RunPathfindingTest(bool validPath = true)
+    {
+        //Setup the world nodes
+        worldSize = 8;
+        worldNodes = new Node[worldSize, worldSize];
+        //Fill the world nodes array with default values
+        for (int x = 0; x < 8; x++)
+        {
+            for (int y = 0; y < 8; y++)
+            {
+                Node newNode = new Node(x, y);
+                newNode.SetBlocked(true);
+                worldNodes[x, y] = newNode;
+            }
+        }
+        worldNodes[1, 1].SetBlocked(false);
+        worldNodes[2, 1].SetBlocked(false);
+        worldNodes[3, 1].SetBlocked(false);
+        worldNodes[4, 1].SetBlocked(false);
+        worldNodes[4, 2].SetBlocked(false);
+        worldNodes[4, 3].SetBlocked(false);
+        worldNodes[4, 4].SetBlocked(!validPath);
+        worldNodes[4, 5].SetBlocked(false);
+        worldNodes[4, 6].SetBlocked(false);
+        worldNodes[3, 6].SetBlocked(false);
+        worldNodes[2, 6].SetBlocked(false);
+        Log.PrintDebug("Created simple world for testing.");
+        PathfindingRequest request = new PathfindingRequest();
+        request.start_x = 1;
+        request.start_y = 1;
+        request.end_x = 2;
+        request.end_y = 6;
+        return CalculatePath(request);
     }
 
     /// <summary>

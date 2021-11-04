@@ -25,3 +25,6 @@ io_obj :
 }
 ```
 as this is the config currently being used on the repository to generate .obj files from models.
+
+### Licence
+I haven't decided the licence yet so for legal reasons or whatever I own all the copyright for the code here and have the right to change it to whatever licence that gets decided on being used.

@@ -6,74 +6,64 @@ using UnityEngine;
 public partial class Mob : Entity
 {
 
-    protected Turf targetLocation;
-    protected Entity targetEntity;
-
-    //If true will pause requesting to find paths until we get the one we need
-    protected bool awaitingPath = false;
-    //The path we are currently moving upon
-    protected Path path;
+    protected virtual IAiController aiController { get; set; }
     
+    public virtual float attackRange { get; } = 0.3f;
+    protected virtual DamageType genericAttackDamageType { get; } = DamageType.Blunt;
+    protected virtual int genericAttackDamageAmount { get; } = 1;
+    protected virtual int genericAttackArmourPenetration { get; } = 0;
+
+    protected virtual void SetupAiController()
+    {
+        throw new System.NotImplementedException();
+    }
+
     /// <summary>
     /// To be run by the master client.
     /// </summary>
     public virtual void HandleMobAction()
     {
-        //Firstly check our vision
-        CheckMobVision();
-        
-        if(targetEntity == null)
-        {
-            if(GetMobTarget())
-            {
-                MoveToTarget();
-            }
-            else
-            {
-                Wander();
-            }
-        }
-        else
-        {
-            MoveToTarget();
-        }
+        aiController.PerformAction();
     }
 
-    /// <summary>
-    /// Gets a nearby mob target
-    /// </summary>
-    /// <returns>True if we find a nearby target</returns>
-    public virtual bool GetMobTarget()
+    /**
+     * Begins the attack animation:
+     *  - Starts a co-routine that:
+     *  - Waits for a small time
+     *  - Applies damage to the target if they are still in range (Calls the damage method)
+     *  - Does the animation for attack
+     */
+    public virtual void DoGenericAttack(Mob target)
     {
+        StartCoroutine("AttackCoroutine", target);
+    }
+
+    /**
+     * Do the attack animatino and apply damage.
+     * Animation:
+     * Mob moves backwards slowly
+     * Mob moves forward quickly and applies damage if target still in range
+     * Mob shakes a bit.
+     */
+    protected virtual IEnumerator GenericAttackCoroutine(Mob target)
+    {
+        //TODO
+        return null;
+    }
+
+    protected virtual void DoGenericAttackDamage(Mob target, Vector3 damamgeLocation)
+    {
+        target.ApplyDamage(genericAttackDamageType, genericAttackDamageAmount, genericAttackArmourPenetration);
+    }
+
+    public bool CheckFactions(Mob other)
+    {
+        foreach(string faction in factions)
+        {
+            if(other.factions.Contains(faction))
+                return true;
+        }
         return false;
-    }
-
-    /// <summary>
-    /// Move to target location, or just randomly move if its null
-    /// </summary>
-    public virtual void Wander()
-    { }
-
-    /// <summary>
-    /// Move towards our target.
-    /// </summary>
-    public virtual void MoveToTarget()
-    {
-
-    }
-
-    /// <summary>
-    /// Checks to see if we can see the target and makes them null if we cannot.
-    /// </summary>
-    public virtual void CheckMobVision()
-    {
-        if(targetEntity == null) return;
-        //Linecast ignoring mobs
-        int layerMask = (1 << 0);
-        if(Physics.Linecast(transform.position, targetEntity.transform.position, layerMask))
-        {
-            targetEntity = null;
-        }
     }
 
 }

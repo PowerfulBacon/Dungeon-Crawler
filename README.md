@@ -4,9 +4,6 @@
 ## Unity Version
 2021.1.15f1
 
-## .Net Version
-.Net 3.0 is required as the project utilizes interface implementation which is not supported before C# 8.0.
-
 ## Getting Started
 Download the project and open in Unity. You may need to install Unity Version 2021.1.15f1.
 You will need to go to Window > Photon Unity Networking and run the setup wizard, providing a project ID for a create PUN application. (You will need to create this for testing)

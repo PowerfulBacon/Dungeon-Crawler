@@ -3,7 +3,10 @@ using System.Collections.Generic;
 using Dungeon_Crawler;
 using UnityEngine;
 
-public partial class Mob : Entity
+/**
+ * All AI related actions
+ */
+public partial class Mob : Entity, IMobAi
 {
 
     protected virtual IAiController aiController { get; set; }
@@ -26,6 +29,12 @@ public partial class Mob : Entity
         aiController.PerformAction();
     }
 
+    //Mob moves towards a point
+    public void MoveTowards(Vector3 point)
+    {
+        throw new System.NotImplementedException();
+    }
+
     /**
      * Begins the attack animation:
      *  - Starts a co-routine that:
@@ -33,7 +42,7 @@ public partial class Mob : Entity
      *  - Applies damage to the target if they are still in range (Calls the damage method)
      *  - Does the animation for attack
      */
-    public virtual void DoGenericAttack(Mob target)
+    public virtual void DoGenericAttack(IMobAi target)
     {
         StartCoroutine("AttackCoroutine", target);
     }
@@ -45,25 +54,76 @@ public partial class Mob : Entity
      * Mob moves forward quickly and applies damage if target still in range
      * Mob shakes a bit.
      */
-    protected virtual IEnumerator GenericAttackCoroutine(Mob target)
+    protected virtual IEnumerator GenericAttackCoroutine(IMobAi target)
     {
-        //TODO
-        return null;
+        //The mob should be frozen while doing this.
+        Vector3 startingPosition = transform.position;
+        float timeElapsed = 0;
+        //Move backwards
+        while(timeElapsed < 0.25f)
+        {
+            timeElapsed += 1 / 30.0f;
+            transform.position = startingPosition + (-0.2f * transform.forward) * Mathf.Sin(timeElapsed * (Mathf.PI * 2 / 0.25f));
+            yield return new WaitForSeconds(1 / 30.0f);
+        }
+        //Lunge forward
+        timeElapsed = 0;
+        while(timeElapsed < 0.05f)
+        {
+            timeElapsed += 1 / 30.0f;
+            transform.position = (startingPosition - 0.2f * transform.forward) + (0.4f * transform.forward) * (timeElapsed / 0.05f);
+            yield return new WaitForSeconds(1 / 30.0f);
+        }
+        //Deal damage (if player is still in range)
+        if(Vector3.Distance(target.GetPosition(), transform.position) < attackRange)
+        {
+            DoGenericAttackDamage(target, target.GetPosition());
+        }
     }
 
-    protected virtual void DoGenericAttackDamage(Mob target, Vector3 damamgeLocation)
+    protected virtual void DoGenericAttackDamage(IMobAi target, Vector3 damamgeLocation)
     {
-        target.ApplyDamage(genericAttackDamageType, genericAttackDamageAmount, genericAttackArmourPenetration);
+        target.GetParent().ApplyDamage(genericAttackDamageType, genericAttackDamageAmount, genericAttackArmourPenetration);
     }
 
-    public bool CheckFactions(Mob other)
+    public bool CheckFactions(IMobAi other)
     {
         foreach(string faction in factions)
         {
-            if(other.factions.Contains(faction))
+            if(other.GetFactions().Contains(faction))
                 return true;
         }
         return false;
+    }
+
+    public Vector3 GetPosition()
+    {
+        return transform.position;
+    }
+
+    public int GetHealth()
+    {
+        return healthLeft;
+    }
+
+    public int GetMaxHealth()
+    {
+        return maxHealth;
+    }
+
+    public List<string> GetFactions()
+    {
+        return factions;
+    }
+
+    public Mob GetParent()
+    {
+        return this;
+    }
+
+    public bool IsMobBusy()
+    {
+        throw new System.NotImplementedException();
     }
 
 }

@@ -6,19 +6,19 @@ public interface IAiController
 {
 
     //The parent of this AI controller
-    Mob parent { get; set; }
+    IMobAi parent { get; set; }
     
     //Target of the mob
-    Mob target { get; set; }
+    IMobAi target { get; set; }
 
     //Vision range
     int visionRange { get; }
 
     //Takeover control of a mob
-    void Takeover(Mob parent);
-    
+    void Takeover(IMobAi parent);
+
     //Checks vision for new targets
-    void CheckVision(List<Mob> view);
+    void CheckVision(List<IMobAi> view);
 
     //Checks vision to see if current target is in view
     void CheckTarget();

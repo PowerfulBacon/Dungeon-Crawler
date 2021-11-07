@@ -12,13 +12,13 @@ public class RatController : AiControllerDefault
         Wander,
     }
 
-    public override Mob target { get; set; }
+    public override IMobAi target { get; set; }
 
     public override int visionRange { get; } = 5;
 
     private float fleeMultiplier = 0.4f;
 
-    public override void CheckVision(List<Mob> view)
+    public override void CheckVision(List<IMobAi> view)
     {
         
     }
@@ -30,6 +30,13 @@ public class RatController : AiControllerDefault
 
     public override void PerformAction()
     {
+
+        //The mob is busy
+        if(parent.IsMobBusy())
+        {
+            return;
+        }
+
         switch(DecideAction())
         {
             case Action.Attack:
@@ -48,7 +55,14 @@ public class RatController : AiControllerDefault
     //Attack the target when in range after some small time
     private void HandleAttackAction()
     {
-
+        if(parent.IsInAttackRange(target))
+        {
+            parent.DoGenericAttack(target);
+        }
+        else
+        {
+            parent.MoveTowards(target.GetPosition());
+        }
     }
 
     private void HandleFleeAction()
@@ -65,7 +79,7 @@ public class RatController : AiControllerDefault
     {
         if(target == null)
             return Action.Wander;
-        if(parent.healthLeft < parent.maxHealth * fleeMultiplier)
+        if(parent.GetHealth() < parent.GetMaxHealth() * fleeMultiplier)
             return Action.Flee;
         return Action.Attack;
     }

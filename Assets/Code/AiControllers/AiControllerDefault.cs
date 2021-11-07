@@ -6,9 +6,9 @@ using UnityEngine;
 public class AiControllerDefault : IAiController
 {
     
-    public Mob parent { get; set; }
+    public IMobAi parent { get; set; }
 
-    public virtual Mob target { get; set; }
+    public virtual IMobAi target { get; set; }
 
     public virtual int visionRange { get; } = 3;
 
@@ -22,7 +22,7 @@ public class AiControllerDefault : IAiController
         if(forgettingTarget)
             return;
         //Raycast to target and check if they are still in view
-        if(!Physics.Linecast(target.transform.position, parent.transform.position, layermask))
+        if(!Physics.Linecast(target.GetPosition(), parent.GetPosition(), layermask))
         {
             //Check again and forget after a few seconds
             Thread thread = new Thread(CheckAndForgetTarget);
@@ -31,20 +31,20 @@ public class AiControllerDefault : IAiController
         }
     }
 
-    public virtual void CheckVision(List<Mob> view)
+    public virtual void CheckVision(List<IMobAi> view)
     {
         //Try to find new targets.
         //Get all targets within the vision range
-        foreach (Mob mob in view)
+        foreach (IMobAi mob in view)
         {
             //Ignore friendly mobs
             if(parent.CheckFactions(mob))
                 continue;
             //Ignore mobs that are out of our vision range.
-            if(Vector3.Distance(mob.transform.position, parent.transform.position) > visionRange)
+            if(Vector3.Distance(mob.GetPosition(), parent.GetPosition()) > visionRange)
                 continue;
             //Ignore mobs that are obstructed by walls or whatever
-            if(!Physics.Linecast(mob.transform.position, parent.transform.position, layermask))
+            if(!Physics.Linecast(mob.GetPosition(), parent.GetPosition(), layermask))
                 continue;
             //New target found
             target = mob;
@@ -57,7 +57,7 @@ public class AiControllerDefault : IAiController
     {
         //I think this works.
         Thread.Sleep(1000);
-        if(!Physics.Linecast(target.transform.position, parent.transform.position, layermask))
+        if(!Physics.Linecast(target.GetPosition(), parent.GetPosition(), layermask))
         {
             ForgetTarget();
         }
@@ -75,7 +75,7 @@ public class AiControllerDefault : IAiController
         throw new System.NotImplementedException();
     }
 
-    public void Takeover(Mob parent)
+    public void Takeover(IMobAi parent)
     {
         this.parent = parent;
     }

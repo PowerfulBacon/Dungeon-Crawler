@@ -14,7 +14,7 @@ public partial class Mob : Entity
     }
 
     //The maximum health of the mob.
-    protected int maxHealth { get; set; } = 1;
+    public virtual int maxHealth { get; protected set; } = 1;
 
     //Damage losses.
     protected int damageLoss = 0;

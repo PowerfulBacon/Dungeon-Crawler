@@ -22,7 +22,8 @@ public partial class Mob : Entity
 
     //Server variable
     //Factions this mob is a part of
-    public string[] factions;
+    //Default get no factions
+    public virtual List<string> factions { get; } = new List<string>();
 
     /// <summary>
     /// Serverside init.

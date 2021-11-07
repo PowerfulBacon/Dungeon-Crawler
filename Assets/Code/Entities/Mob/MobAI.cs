@@ -3,77 +3,127 @@ using System.Collections.Generic;
 using Dungeon_Crawler;
 using UnityEngine;
 
-public partial class Mob : Entity
+/**
+ * All AI related actions
+ */
+public partial class Mob : Entity, IMobAi
 {
 
-    protected Turf targetLocation;
-    protected Entity targetEntity;
-
-    //If true will pause requesting to find paths until we get the one we need
-    protected bool awaitingPath = false;
-    //The path we are currently moving upon
-    protected Path path;
+    protected virtual IAiController aiController { get; set; }
     
+    public virtual float attackRange { get; } = 0.3f;
+    protected virtual DamageType genericAttackDamageType { get; } = DamageType.Blunt;
+    protected virtual int genericAttackDamageAmount { get; } = 1;
+    protected virtual int genericAttackArmourPenetration { get; } = 0;
+
+    protected virtual void SetupAiController()
+    {
+        throw new System.NotImplementedException();
+    }
+
     /// <summary>
     /// To be run by the master client.
     /// </summary>
     public virtual void HandleMobAction()
     {
-        //Firstly check our vision
-        CheckMobVision();
-        
-        if(targetEntity == null)
+        aiController.PerformAction();
+    }
+
+    //Mob moves towards a point
+    public void MoveTowards(Vector3 point)
+    {
+        throw new System.NotImplementedException();
+    }
+
+    /**
+     * Begins the attack animation:
+     *  - Starts a co-routine that:
+     *  - Waits for a small time
+     *  - Applies damage to the target if they are still in range (Calls the damage method)
+     *  - Does the animation for attack
+     */
+    public virtual void DoGenericAttack(IMobAi target)
+    {
+        StartCoroutine("AttackCoroutine", target);
+    }
+
+    /**
+     * Do the attack animatino and apply damage.
+     * Animation:
+     * Mob moves backwards slowly
+     * Mob moves forward quickly and applies damage if target still in range
+     * Mob shakes a bit.
+     */
+    protected virtual IEnumerator GenericAttackCoroutine(IMobAi target)
+    {
+        //The mob should be frozen while doing this.
+        Vector3 startingPosition = transform.position;
+        float timeElapsed = 0;
+        //Move backwards
+        while(timeElapsed < 0.25f)
         {
-            if(GetMobTarget())
-            {
-                MoveToTarget();
-            }
-            else
-            {
-                Wander();
-            }
+            timeElapsed += 1 / 30.0f;
+            transform.position = startingPosition + (-0.2f * transform.forward) * Mathf.Sin(timeElapsed * (Mathf.PI * 2 / 0.25f));
+            yield return new WaitForSeconds(1 / 30.0f);
         }
-        else
+        //Lunge forward
+        timeElapsed = 0;
+        while(timeElapsed < 0.05f)
         {
-            MoveToTarget();
+            timeElapsed += 1 / 30.0f;
+            transform.position = (startingPosition - 0.2f * transform.forward) + (0.4f * transform.forward) * (timeElapsed / 0.05f);
+            yield return new WaitForSeconds(1 / 30.0f);
+        }
+        //Deal damage (if player is still in range)
+        if(Vector3.Distance(target.GetPosition(), transform.position) < attackRange)
+        {
+            DoGenericAttackDamage(target, target.GetPosition());
         }
     }
 
-    /// <summary>
-    /// Gets a nearby mob target
-    /// </summary>
-    /// <returns>True if we find a nearby target</returns>
-    public virtual bool GetMobTarget()
+    protected virtual void DoGenericAttackDamage(IMobAi target, Vector3 damamgeLocation)
     {
+        target.GetParent().ApplyDamage(genericAttackDamageType, genericAttackDamageAmount, genericAttackArmourPenetration);
+    }
+
+    public bool CheckFactions(IMobAi other)
+    {
+        foreach(string faction in factions)
+        {
+            if(other.GetFactions().Contains(faction))
+                return true;
+        }
         return false;
     }
 
-    /// <summary>
-    /// Move to target location, or just randomly move if its null
-    /// </summary>
-    public virtual void Wander()
-    { }
-
-    /// <summary>
-    /// Move towards our target.
-    /// </summary>
-    public virtual void MoveToTarget()
+    public Vector3 GetPosition()
     {
-
+        return transform.position;
     }
 
-    /// <summary>
-    /// Checks to see if we can see the target and makes them null if we cannot.
-    /// </summary>
-    public virtual void CheckMobVision()
+    public int GetHealth()
     {
-        if(targetEntity == null) return;
-        //Linecast ignoring mobs
-        int layerMask = (1 << 0);
-        if(Physics.Linecast(transform.position, targetEntity.transform.position, layerMask))
-        {
-            targetEntity = null;
-        }
+        return healthLeft;
+    }
+
+    public int GetMaxHealth()
+    {
+        return maxHealth;
+    }
+
+    public List<string> GetFactions()
+    {
+        return factions;
+    }
+
+    public Mob GetParent()
+    {
+        return this;
+    }
+
+    public bool IsMobBusy()
+    {
+        throw new System.NotImplementedException();
     }
 
 }
